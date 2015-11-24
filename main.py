@@ -6,13 +6,14 @@ with open('crunchbase_descriptions.txt') as f:
 
 # Build the model
 print 'Building model...this could take a few seconds.\n'
-# text_model = markovify.Text(text) # default 2
-text_model = markovify.Text(text, state_size=3)
+
+state_size = 2
+text_model = markovify.Text(text, state_size=state_size)
 
 # Print five randomly-generated sentences
-for i in range(5):
-  print(text_model.make_sentence())
+# for i in range(5):
+  # print(text_model.make_sentence())
 
 # Print three randomly-generated sentences of no more than 300 characters
-# for i in range(3):
-  # print(text_model.make_short_sentence(300))
+for i in range(3):
+  print(text_model.make_short_sentence(300))

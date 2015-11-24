@@ -1,0 +1,18 @@
+import markovify
+
+# Get raw text as string.
+with open('crunchbase_descriptions.txt') as f:
+  text = f.read()
+
+# Build the model
+print 'Building model...this could take a few seconds.\n'
+# text_model = markovify.Text(text) # default 2
+text_model = markovify.Text(text, state_size=3)
+
+# Print five randomly-generated sentences
+for i in range(5):
+  print(text_model.make_sentence())
+
+# Print three randomly-generated sentences of no more than 300 characters
+# for i in range(3):
+  # print(text_model.make_short_sentence(300))

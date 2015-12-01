@@ -119,8 +119,9 @@ class Generator(object):
 
     with open(corpus_path) as f:
       text = f.read()
-      sentences = list(self.generate_sentences(text))
-      self.model = Model(sentences, token_size)
+      # sentences = self.generate_sentences(text)
+      sentences = self.generate_sentences_by_char(text)
+      # self.model = Model(sentences, token_size)
 
   def clean_punctuation(self, sentence):
     '''
@@ -158,7 +159,18 @@ class Generator(object):
     contextually probable sentence breaks, and divides into sentences.
     '''
 
-    return text
+    breaks = [' ', '\n']
+    punctuation = ['?', '!']
+
+    break_indexes = [0]
+    for i in len(text):
+      curr = text[i]
+      foll = text[i+1]
+
+      if curr in punctuation and foll in breaks:
+
+
+      if c == '\n':
 
   def generate_sentences(self, text):
     '''

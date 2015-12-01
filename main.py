@@ -1,19 +1,11 @@
-import markovify
+import markov
 
-# Get raw text as string.
-with open('crunchbase_descriptions.txt') as f:
-  text = f.read()
-
-# Build the model
 print 'Building model...this could take a few seconds.\n'
 
-state_size = 2
-text_model = markovify.Text(text, state_size=state_size)
+# corpus_path = 'crunchbase_descriptions_small.txt'
+corpus_path = 'crunchbase_descriptions.txt'
+token_size = 2
 
-# Print five randomly-generated sentences
-# for i in range(5):
-  # print(text_model.make_sentence())
-
-# Print three randomly-generated sentences of no more than 300 characters
-for i in range(3):
-  print(text_model.make_short_sentence(300))
+model = markov.Generator(corpus_path, token_size)
+for i in range(5):
+  print model.create_sentence() + '\n'

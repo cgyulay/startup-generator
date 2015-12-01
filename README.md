@@ -4,6 +4,6 @@ Using Markov chains to generate fake startup ideas: the monkeys on typewriters a
 ----
 ####Setup
 ```
-pip install markovify
+pip install nltk
 python main.py
 ```

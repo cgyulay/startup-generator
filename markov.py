@@ -131,7 +131,8 @@ class Generator(object):
     replaces non-standard spaces.
     '''
 
-    if not any(itertools.imap(sentence.__contains__, '"()[]‘’“”')):
+    # For simplicity, discard sentences with ? or ! (~.5% training set)
+    if not any(itertools.imap(sentence.__contains__, '"?!()[]‘’“”')):
       # Remove non-standard spaces
       sentence = sentence.decode('utf8')
       sentence = sentence.replace(u'\xa0', u' ')
@@ -159,18 +160,41 @@ class Generator(object):
     contextually probable sentence breaks, and divides into sentences.
     '''
 
-    breaks = [' ', '\n']
-    punctuation = ['?', '!']
+    # First, outright discard entries with difficult punctuation
+    cleaned = [self.clean_punctuation(s) for s in text.split('\n')]
+    cleaned = [s for s in cleaned if s != None]
 
-    break_indexes = [0]
-    for i in len(text):
-      curr = text[i]
-      foll = text[i+1]
+    sentences = []
+    for sentence in cleaned:
+      indexes = [0]
+      for i in range(len(sentence)):
+        if sentence[i] == '.':
 
-      if curr in punctuation and foll in breaks:
+          # Handle Inc.
+          if sentence[i-3:i].lower() == 'inc':
+            continue
+
+          # Handle last char (short-circuiting)
+          elif i == len(sentence)-1:
+            indexes.append(i)
+
+          # Handle tlds (.com, .net, etc)
+          elif sentence[i+1] != ' ':
+            continue
+
+          # Otherwise, it should end a sentence
+          else:
+            indexes.append(i)
+
+      for i in range(len(indexes)):
+        if indexes[i] == len(sentence)-1: break
+        split = sentence[indexes[i]:indexes[i+1]]
+        sentences.append(split)
 
 
-      if c == '\n':
+    # This is very close to being done, just need to work out last spacing
+    # kinks and convert to list of lists  
+    return sentences
 
   def generate_sentences(self, text):
     '''

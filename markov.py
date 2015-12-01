@@ -10,10 +10,6 @@ from unidecode import unidecode
 START = 'XxSTARTxX'
 STOP = 'XxSTOPxX'
 
-DEFAULT_MAX_OVERLAP_RATIO = 0.7
-DEFAULT_MAX_OVERLAP_TOTAL = 15
-DEFAULT_TRIES = 10
-
 ##
 # IDEAS
 ##
@@ -25,6 +21,7 @@ DEFAULT_TRIES = 10
 #     similarity between first and following complete sentence
 #
 # 1)  use bag of words to ensure similar language among sentences
+# 2)  combine BOW with embeddings?
 ##
 # how to improve sentence separation/filtration
 # 1)  assume sentences break on period/exclamation/question
@@ -114,6 +111,8 @@ class Generator(object):
     '''
     corpus_path: Path to training corpus.
     token_size: Number of words in the model's context window.
+
+    Takes a corpus and produces a queryable model that generates sentences.
     '''
 
     self.token_size = token_size
@@ -123,9 +122,50 @@ class Generator(object):
       sentences = list(self.generate_sentences(text))
       self.model = Model(sentences, token_size)
 
+  def clean_punctuation(self, sentence):
+    '''
+    sentence: A sentence split out from the corpus.
+
+    Rejects sentences with troublesome long-term dependency punctuation, then
+    replaces non-standard spaces.
+    '''
+
+    if not any(itertools.imap(sentence.__contains__, '"()[]‘’“”')):
+      # Remove non-standard spaces
+      sentence = sentence.decode('utf8')
+      sentence = sentence.replace(u'\xa0', u' ')
+      return unidecode(sentence)
+    else: return None
+
+  def split_and_pad(self, sentence, token_size):
+    '''
+    sentence: A sentence split out from the corpus.
+
+    Converts a sentence into an array and adds padding proportional to
+    token_size.
+    '''
+
+    separated = sentence.split(' ')
+
+    # Pad beginning and end with special indicator tokens
+    return [START] * token_size + separated + [STOP]
+
+  def generate_sentences_by_char(self, text):
+    '''
+    text: Text from training corpus.
+
+    Examines the corpus character by character, identifies locations of
+    contextually probable sentence breaks, and divides into sentences.
+    '''
+
+    return text
+
   def generate_sentences(self, text):
     '''
     text: Text from training corpus.
+
+    Divides the corpus into sentences naively, using punctuation indicators
+    to split sentences.
     '''
 
     # Break sentences on punctuation
@@ -153,22 +193,11 @@ class Generator(object):
     # Remove sentences with difficult long-term dependency punctuation
     cleaned = []
     for s in combined:
-      if not any(itertools.imap(s.__contains__, '"()[]‘’“”')):
-
-        # Remove non-standard spaces
-        s = s.decode('utf8')
-        s = s.replace(u'\xa0', u' ')
-        # s = s.encode('ascii')
-        s = unidecode(s)
-
-        # Convert to array of words separated by spaces
-        separated = s.split(' ')
-
-        # Pad beginning and end with special indicator tokens
-        padded = [START] * self.token_size + separated + [STOP]
+      s = self.clean_punctuation(s)
+      if s != None:
+        # Split into array and add padding
+        padded = self.split_and_pad(s, self.token_size)
         cleaned.append(padded)
-
-
     return cleaned
 
   def create_sentence(self):

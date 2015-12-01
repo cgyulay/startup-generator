@@ -3,6 +3,7 @@
 import re
 import itertools
 import random
+import nltk
 from unidecode import unidecode
 
 # Special tokens modeled after my #sick gamertag
@@ -166,6 +167,8 @@ class Generator(object):
         # Pad beginning and end with special indicator tokens
         padded = [START] * self.token_size + separated + [STOP]
         cleaned.append(padded)
+
+
     return cleaned
 
   def create_sentence(self):

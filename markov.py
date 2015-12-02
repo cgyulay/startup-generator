@@ -182,6 +182,10 @@ class Generator(object):
           elif sentence[i+1] != ' ':
             continue
 
+          # Handle string of single letter abbreviations
+          elif sentence[i-2] == '.':
+            continue
+
           # Otherwise, it should end a sentence
           else:
             indexes.append(i)

@@ -119,9 +119,9 @@ class Generator(object):
 
     with open(corpus_path) as f:
       text = f.read()
-      # sentences = self.generate_sentences(text)
-      sentences = self.generate_sentences_by_char(text)
-      # self.model = Model(sentences, token_size)
+      sentences = self.generate_sentences(text)
+      # sentences = self.generate_sentences_by_char(text)
+      self.model = Model(sentences, token_size)
 
   def clean_punctuation(self, sentence):
     '''
@@ -208,7 +208,7 @@ class Generator(object):
     sentences = re.split('(!|\?|\.|\n)', text)
     sentences = [s for s in sentences if s != '\n' and s != '']
     sentences = [s.strip() for s in sentences]
-
+    # print sentences
     skip_next = False
     combined = []
     for i in range(1, len(sentences)):
@@ -221,9 +221,14 @@ class Generator(object):
         # Need to specifically handle tlds like .com, .net for this dataset
         # Assume there are no sentences with one word
         # Can pass tuple to startswith if helpful
-        # if sentences[i+1].startswith('com '):
 
-        c = sentences[i-1] + sentences[i]
+        # handles these cases, more can be added with similar method
+        # one issue now is that sentences still can start with "com" or something, making it nonsense
+        if (i < len(sentences) - 1) and (sentences[i+1].lower().startswith('com') or sentences[i-1].lower().endswith('inc') or \
+          sentences[i+1].lower().startswith('it') or sentences[i+1].lower().startswith('net') or sentences[i+1].lower().startswith('dm')):
+          c = sentences[i-1] + sentences[i] + sentences[i+1]
+        else:
+          c = sentences[i-1] + sentences[i]
         combined.append(c)
     
     # Remove sentences with difficult long-term dependency punctuation

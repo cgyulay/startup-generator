@@ -121,7 +121,7 @@ class Generator(object):
       text = f.read()
       # sentences = self.generate_sentences(text)
       sentences = self.generate_sentences_by_char(text)
-      # self.model = Model(sentences, token_size)
+      self.model = Model(sentences, token_size)
 
   def clean_punctuation(self, sentence):
     '''
@@ -186,14 +186,18 @@ class Generator(object):
           else:
             indexes.append(i)
 
-      for i in range(len(indexes)):
-        if indexes[i] == len(sentence)-1: break
-        split = sentence[indexes[i]:indexes[i+1]]
-        sentences.append(split)
+      for i in range(1, len(indexes)):
+        indexes[i] += 1
 
+      # Turn a series of break indexes into tuples that correspond to the range
+      # of each complete sentence
+      slices = zip(indexes, indexes[1::])
+      for s in slices:
+        split = sentence[s[0]:s[1]]
+        split = split.strip()
+        padded = self.split_and_pad(split, self.token_size)
+        sentences.append(padded)
 
-    # This is very close to being done, just need to work out last spacing
-    # kinks and convert to list of lists
     return sentences
 
   def generate_sentences(self, text):

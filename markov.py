@@ -26,12 +26,6 @@ MAX_BOW_OVERLAP = 0.5
 # 1)  use bag of words to ensure similar language among sentences
 # 2)  combine BOW with embeddings?
 ##
-# how to improve sentence separation/filtration
-# 1)  assume sentences break on period/exclamation/question
-# 2)  if sentence is below some threshhold length, assume it's abbrevs
-# 3)  if possible filter out sentences with problematic long-term
-#     dependencies (quotes, parens, brackets)
-##
 
 
 class Model(object):
@@ -139,19 +133,48 @@ class Generator(object):
       # sentences = self.generate_sentences(text)
       # Works better but sacrifices more of the training data
       sentences = self.generate_sentences_by_char(text)
+      print 'Extracted {0} valid sentences from corpus.'.format(len(sentences))
 
-      # Add POS tags to training
-      # sentences[0] = ['::'.join(tag) for tag in nltk.pos_tag(sentences[0])]
-      print sentences[0]
+      # Add POS tags to training sentences
+      # NB: This takes f*cking forever
+      # tagged = []
+      # for s in sentences:
+        # tagged.append(self.pos_tag(s))
 
       # Save the training sentences for 'creativity' test
       self.training_words = map(self.remove_padding, sentences)
 
       self.model = Model(sentences, token_size)
 
+  def pos_tag(self, words):
+    '''
+    words: Sentence in list form.
+
+    Uses nltk to add part of speech tags to each word in a provided list. 
+    '''
+
+    tagged = nltk.pos_tag(words)
+    combined = ['__'.join(w) for w in tagged]
+    return combined
+
+  def remove_pos_tag(self, words):
+    '''
+    words: Sentence in list form.
+
+    Removes part of speech suffix tags from each word.
+    '''
+
+    def remove(w):
+      i = w.find('__')
+      if i == -1: return w
+      return w[:i]
+
+    words = [remove(w) for w in words]
+    return words
+
   def clean_punctuation(self, sentence):
     '''
-    sentence: A sentence split out from the corpus.
+    sentence: Sentence split out from the corpus.
 
     Rejects sentences with troublesome long-term dependency punctuation, then
     replaces non-standard spaces.
@@ -164,15 +187,6 @@ class Generator(object):
       sentence = sentence.replace(u'\xa0', u' ')
       return unidecode(sentence)
     else: return None
-
-  def remove_padding(self, words):
-    '''
-    words: Sentence in list form.
-
-    Removes start and stop indicator tokens.
-    '''
-
-    return filter(lambda w: w != START and w != STOP, words)
 
   def generate_sentences_by_char(self, text):
     '''
@@ -268,6 +282,15 @@ class Generator(object):
         cleaned.append(s)
     return cleaned
 
+  def remove_padding(self, words):
+    '''
+    words: Sentence in list form.
+
+    Removes start and stop indicator tokens.
+    '''
+
+    return filter(lambda w: w != START and w != STOP, words)
+
   def sentence_overlap(self, w1, w2):
     '''
     w1, w2: Word lists with which to compare overlap.
@@ -275,7 +298,7 @@ class Generator(object):
     Returns ratio of language overlap between two sentences.
     '''
 
-    if w1 == None or w2 == None: return 0.0
+    if w1 == None or w2 == None or len(set(w1) | set(w2)) == 0: return 0.0
 
     # stackoverflow.com/q/29929074
     return len(set(w1) & set(w2)) / float(len(set(w1) | set(w2)))
@@ -297,12 +320,13 @@ class Generator(object):
 
   def create_sentence(self):
     '''
-    Attempts to create a test-passing sentence in a certain number of tries.
+    Attempts to create a test-passing sentence within a certain number of tries.
     '''
 
     for i in range(5):
       words = self.model.create_sentence()
       if self.test_sentence(words):
+        words = self.remove_pos_tag(words)
         return ' '.join(words)
     return None
 

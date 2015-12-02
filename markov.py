@@ -42,8 +42,20 @@ class Model(object):
     token_size: Number of words in the model's context window.
     '''
 
+    sentences = [self.pad(s, token_size) for s in sentences]
+
     self.token_size = token_size
     self.dictionary = self.construct(sentences)
+
+  def pad(self, sentence, token_size):
+    '''
+    sentence: A sentence split out from the corpus.
+
+    Adds padding proportional to token_size.
+    '''
+
+    # Pad beginning and end with special indicator tokens
+    return [START] * token_size + sentence + [STOP]
 
   def construct(self, sentences):
     '''
@@ -128,6 +140,10 @@ class Generator(object):
       # Works better but sacrifices more of the training data
       sentences = self.generate_sentences_by_char(text)
 
+      # Add POS tags to training
+      # sentences[0] = ['::'.join(tag) for tag in nltk.pos_tag(sentences[0])]
+      print sentences[0]
+
       # Save the training sentences for 'creativity' test
       self.training_words = map(self.remove_padding, sentences)
 
@@ -157,19 +173,6 @@ class Generator(object):
     '''
 
     return filter(lambda w: w != START and w != STOP, words)
-
-  def split_and_pad(self, sentence, token_size):
-    '''
-    sentence: A sentence split out from the corpus.
-
-    Converts a sentence into an array and adds padding proportional to
-    token_size.
-    '''
-
-    separated = sentence.split(' ')
-
-    # Pad beginning and end with special indicator tokens
-    return [START] * token_size + separated + [STOP]
 
   def generate_sentences_by_char(self, text):
     '''
@@ -217,10 +220,11 @@ class Generator(object):
       # stackoverflow.com/q/23507320
       slices = zip(indexes, indexes[1::])
       for s in slices:
-        split = sentence[s[0]:s[1]]
-        split = split.strip()
-        padded = self.split_and_pad(split, self.token_size)
-        sentences.append(padded)
+        separated = sentence[s[0]:s[1]]
+        separated = separated.strip()
+        split = separated.split(' ')
+        # padded = self.split_and_pad(split, self.token_size)
+        sentences.append(split)
 
     return sentences
 
@@ -260,8 +264,8 @@ class Generator(object):
       s = self.clean_punctuation(s)
       if s != None:
         # Split into array and add padding
-        padded = self.split_and_pad(s, self.token_size)
-        cleaned.append(padded)
+        s = s.split(' ')
+        cleaned.append(s)
     return cleaned
 
   def sentence_overlap(self, w1, w2):

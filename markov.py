@@ -129,7 +129,6 @@ class Generator(object):
     with open(corpus_path) as f:
       text = f.read()
 
-
       # Relatively naive sentence splitting on punctuation
       # sentences = self.generate_sentences(text)
       # Works better but sacrifices more of the training data
@@ -172,7 +171,6 @@ class Generator(object):
 
     words = [remove(w) for w in words]
     return words
-
 
   def clean_punctuation(self, sentence):
     '''

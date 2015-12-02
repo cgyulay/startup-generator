@@ -10,6 +10,9 @@ from unidecode import unidecode
 START = 'XxSTARTxX'
 STOP = 'XxSTOPxX'
 
+# Maximum bag of words overlap ratio between two sentences
+MAX_BOW_OVERLAP = 0.5
+
 ##
 # IDEAS
 ##
@@ -282,16 +285,15 @@ class Generator(object):
 
     # 1) Use a bag of words approach to ensure a sentence has a below
     #    threshold language overlap with any given training sentence
-    max_overlap = 0.5
     for w in self.training_words:
-      if self.sentence_overlap(words, w) > max_overlap:
+      if self.sentence_overlap(words, w) > MAX_BOW_OVERLAP:
         return False
 
     return True
 
   def create_sentence(self):
     '''
-    Attempts to create a test passing sentence in a certain number of tries.
+    Attempts to create a test-passing sentence in a certain number of tries.
     '''
 
     for i in range(5):

@@ -1,7 +1,7 @@
 import markovify
 
 # Get raw text as string.
-with open('crunchbase_descriptions.txt') as f:
+with open('corpora/crunchbase_descriptions.txt') as f:
   text = f.read()
 
 # Build the model

@@ -191,7 +191,6 @@ Grockit, an online test prep platform leveraging adaptive learning engine and of
 PeerMe is a free communication tool for peer-to-peer voice and instant messaging.
 Kiptronic offers a platform for inserting video and audio ads into digital media for consumption on any device.
 Visible Path is a business social network allowing users to organize and display their business contacts.
-Real Time Matrix Corp, based in Berkeley ,CA, specializes in real time technology to enhance social media.
 Zenfolio provides an all-in-one business and photo management solution for photographers to display, share, and sell their work online.
 CollegeWikis is a group messaging and information platform for students.
 King.com is a social game developer providing online games for global portals, websites and other media companies.

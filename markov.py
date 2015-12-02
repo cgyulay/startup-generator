@@ -10,6 +10,9 @@ from unidecode import unidecode
 START = 'XxSTARTxX'
 STOP = 'XxSTOPxX'
 
+# Maximum bag of words overlap ratio between two sentences
+MAX_BOW_OVERLAP = 0.5
+
 ##
 # IDEAS
 ##
@@ -23,12 +26,6 @@ STOP = 'XxSTOPxX'
 # 1)  use bag of words to ensure similar language among sentences
 # 2)  combine BOW with embeddings?
 ##
-# how to improve sentence separation/filtration
-# 1)  assume sentences break on period/exclamation/question
-# 2)  if sentence is below some threshhold length, assume it's abbrevs
-# 3)  if possible filter out sentences with problematic long-term
-#     dependencies (quotes, parens, brackets)
-##
 
 
 class Model(object):
@@ -39,8 +36,20 @@ class Model(object):
     token_size: Number of words in the model's context window.
     '''
 
+    sentences = [self.pad(s, token_size) for s in sentences]
+
     self.token_size = token_size
     self.dictionary = self.construct(sentences)
+
+  def pad(self, sentence, token_size):
+    '''
+    sentence: A sentence split out from the corpus.
+
+    Adds padding proportional to token_size.
+    '''
+
+    # Pad beginning and end with special indicator tokens
+    return [START] * token_size + sentence + [STOP]
 
   def construct(self, sentences):
     '''
@@ -73,8 +82,8 @@ class Model(object):
 
     d = self.dictionary[preceding]
 
-    # Random pick from weighted dictionary found here
-    # http://stackoverflow.com/questions/2570690
+    # Random pick from weighted dictionary
+    # stackoverflow.com/questions/2570690
     total = sum(d.itervalues())
     pick = random.randint(0, total - 1)
     acc = 0
@@ -119,13 +128,55 @@ class Generator(object):
 
     with open(corpus_path) as f:
       text = f.read()
-      sentences = self.generate_sentences(text)
-      # sentences = self.generate_sentences_by_char(text)
+
+
+      # Relatively naive sentence splitting on punctuation
+      # sentences = self.generate_sentences(text)
+      # Works better but sacrifices more of the training data
+      sentences = self.generate_sentences_by_char(text)
+      print 'Extracted {0} valid sentences from corpus.'.format(len(sentences))
+
+      # Add POS tags to training sentences
+      # NB: This takes f*cking forever
+      # tagged = []
+      # for s in sentences:
+        # tagged.append(self.pos_tag(s))
+
+      # Save the training sentences for 'creativity' test
+      self.training_words = map(self.remove_padding, sentences)
+
       self.model = Model(sentences, token_size)
+
+  def pos_tag(self, words):
+    '''
+    words: Sentence in list form.
+
+    Uses nltk to add part of speech tags to each word in a provided list. 
+    '''
+
+    tagged = nltk.pos_tag(words)
+    combined = ['__'.join(w) for w in tagged]
+    return combined
+
+  def remove_pos_tag(self, words):
+    '''
+    words: Sentence in list form.
+
+    Removes part of speech suffix tags from each word.
+    '''
+
+    def remove(w):
+      i = w.find('__')
+      if i == -1: return w
+      return w[:i]
+
+    words = [remove(w) for w in words]
+    return words
+
 
   def clean_punctuation(self, sentence):
     '''
-    sentence: A sentence split out from the corpus.
+    sentence: Sentence split out from the corpus.
 
     Rejects sentences with troublesome long-term dependency punctuation, then
     replaces non-standard spaces.
@@ -138,19 +189,6 @@ class Generator(object):
       sentence = sentence.replace(u'\xa0', u' ')
       return unidecode(sentence)
     else: return None
-
-  def split_and_pad(self, sentence, token_size):
-    '''
-    sentence: A sentence split out from the corpus.
-
-    Converts a sentence into an array and adds padding proportional to
-    token_size.
-    '''
-
-    separated = sentence.split(' ')
-
-    # Pad beginning and end with special indicator tokens
-    return [START] * token_size + separated + [STOP]
 
   def generate_sentences_by_char(self, text):
     '''
@@ -182,18 +220,28 @@ class Generator(object):
           elif sentence[i+1] != ' ':
             continue
 
+          # Handle string of single letter abbreviations
+          elif sentence[i-2] == '.':
+            continue
+
           # Otherwise, it should end a sentence
           else:
             indexes.append(i)
 
-      for i in range(len(indexes)):
-        if indexes[i] == len(sentence)-1: break
-        split = sentence[indexes[i]:indexes[i+1]]
+      for i in range(1, len(indexes)):
+        indexes[i] += 1
+
+      # Turn a series of break indexes into tuples that correspond to the range
+      # of each complete sentence
+      # stackoverflow.com/q/23507320
+      slices = zip(indexes, indexes[1::])
+      for s in slices:
+        separated = sentence[s[0]:s[1]]
+        separated = separated.strip()
+        split = separated.split(' ')
+        # padded = self.split_and_pad(split, self.token_size)
         sentences.append(split)
 
-
-    # This is very close to being done, just need to work out last spacing
-    # kinks and convert to list of lists  
     return sentences
 
   def generate_sentences(self, text):
@@ -237,10 +285,55 @@ class Generator(object):
       s = self.clean_punctuation(s)
       if s != None:
         # Split into array and add padding
-        padded = self.split_and_pad(s, self.token_size)
-        cleaned.append(padded)
+        s = s.split(' ')
+        cleaned.append(s)
     return cleaned
 
+  def remove_padding(self, words):
+    '''
+    words: Sentence in list form.
+
+    Removes start and stop indicator tokens.
+    '''
+
+    return filter(lambda w: w != START and w != STOP, words)
+
+  def sentence_overlap(self, w1, w2):
+    '''
+    w1, w2: Word lists with which to compare overlap.
+
+    Returns ratio of language overlap between two sentences.
+    '''
+
+    if w1 == None or w2 == None or len(set(w1) | set(w2)) == 0: return 0.0
+
+    # stackoverflow.com/q/29929074
+    return len(set(w1) & set(w2)) / float(len(set(w1) | set(w2)))
+
+  def test_sentence(self, words):
+    '''
+    words: Sentence in list form generated by the Markov model.
+
+    Rejects a sentence that fails to pass tests.
+    '''
+
+    # 1) Use a bag of words approach to ensure a sentence has a below
+    #    threshold language overlap with any given training sentence
+    for w in self.training_words:
+      if self.sentence_overlap(words, w) > MAX_BOW_OVERLAP:
+        return False
+
+    return True
+
   def create_sentence(self):
-    words = self.model.create_sentence()
-    return ' '.join(words)
+    '''
+    Attempts to create a test-passing sentence within a certain number of tries.
+    '''
+
+    for i in range(5):
+      words = self.model.create_sentence()
+      if self.test_sentence(words):
+        words = self.remove_pos_tag(words)
+        return ' '.join(words)
+    return None
+

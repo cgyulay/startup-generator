@@ -137,6 +137,6 @@ class Tagger(object):
     return sentences
 
 # Run
-corpus_path = 'corpora/crunchbase_descriptions_micro.txt'
+corpus_path = 'corpora/crunchbase_descriptions_2000.txt'
 dest_path = 'tagged_' + corpus_path
 tagger = Tagger(corpus_path, dest_path)

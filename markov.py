@@ -11,7 +11,7 @@ START = 'XxSTARTxX'
 STOP = 'XxSTOPxX'
 
 # Maximum bag of words overlap ratio between two sentences
-MAX_BOW_OVERLAP = 0.5
+MAX_BOW_OVERLAP = 0.75
 
 ##
 # IDEAS
@@ -131,9 +131,15 @@ class Generator(object):
 
       # Relatively naive sentence splitting on punctuation
       # sentences = self.generate_sentences(text)
+
       # Works better but sacrifices more of the training data
       sentences = self.generate_sentences_by_char(text)
+
+      # Uses a pos tagged, preprocessed corpus
+      # sentences = self.generate_sentences_from_preprocessed(text)
+
       print 'Extracted {0} valid sentences from corpus.'.format(len(sentences))
+      print '-----\n'
 
       # Add POS tags to training sentences
       # NB: This takes f*cking forever
@@ -187,6 +193,10 @@ class Generator(object):
       sentence = sentence.replace(u'\xa0', u' ')
       return unidecode(sentence)
     else: return None
+
+  def generate_sentences_from_preprocessed(self, text):
+    sentences = text.split('\n')
+    return [s.split(' ') for s in sentences]
 
   def generate_sentences_by_char(self, text):
     '''

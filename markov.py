@@ -11,7 +11,7 @@ START = 'XxSTARTxX'
 STOP = 'XxSTOPxX'
 
 # Maximum bag of words overlap ratio between two sentences
-MAX_BOW_OVERLAP = 0.75
+MAX_BOW_OVERLAP = 0.6
 
 ##
 # IDEAS
@@ -36,10 +36,10 @@ class Model(object):
     token_size: Number of words in the model's context window.
     '''
 
+    self.token_size = token_size
     sentences = [self.pad(s, token_size) for s in sentences]
 
-    self.token_size = token_size
-    self.dictionary = self.construct(sentences)
+    self.dictionary = self.construct(sentences, self.token_size)
 
   def pad(self, sentence, token_size):
     '''
@@ -51,7 +51,7 @@ class Model(object):
     # Pad beginning and end with special indicator tokens
     return [START] * token_size + sentence + [STOP]
 
-  def construct(self, sentences):
+  def construct(self, sentences, token_size):
     '''
     Constructs a nested dictionary that stores all preceding states of length
     token_size, and the transitions from each state with their associated
@@ -61,9 +61,9 @@ class Model(object):
     dictionary = {}
 
     for sentence in sentences:
-      for i in range(len(sentence) - self.token_size):
-        preceding = tuple(sentence[i:i + self.token_size])
-        following = sentence[i + self.token_size]
+      for i in range(len(sentence) - token_size):
+        preceding = tuple(sentence[i:i + token_size])
+        following = sentence[i + token_size]
 
         if preceding not in dictionary:
           dictionary[preceding] = {}
@@ -74,13 +74,15 @@ class Model(object):
           dictionary[preceding][following] += 1
     return dictionary
 
-  def next(self, preceding):
+  def next(self, dictionary, preceding):
     '''
     Picks the next word in the chain by sampling from the weighted distribution
     of the preceding state.
     '''
 
-    d = self.dictionary[preceding]
+    # Cover situations where a longer state doesn't exist
+    d = dictionary.get(preceding, None)
+    if d == None: return ('', 0)
 
     # Random pick from weighted dictionary
     # stackoverflow.com/questions/2570690
@@ -92,7 +94,10 @@ class Model(object):
     for key, weight in d.iteritems():
       acc += weight
       if pick < acc:
-        return key
+        # Return both the key and the total available destination states
+        next_state = preceding[1:] + (key,)
+        total_destinations = len(dictionary.get(next_state, {}))
+        return key, total_destinations
 
   def create_sentence(self):
     '''
@@ -106,9 +111,57 @@ class Model(object):
     words = []
 
     while traversing:
-      following = self.next(preceding)
+      following = self.next(self.dictionary, preceding)[0]
       traversing = following != STOP
       if traversing:
+        words.append(following)
+        preceding = preceding[1:] + (following,)
+    return words
+
+
+class MultiModel(Model):
+
+  def __init__(self, sentences, token_size=2):
+    '''
+    MultiModel builds all models with state sizes 1->token_size, rather than
+    just a single model with a state length of token_size. This allows a
+    dynamic transition model that can rely on any number of preceding words.
+    '''
+
+    self.token_size = token_size
+    sentences = [self.pad(s, token_size) for s in sentences]
+
+    self.dictionaries = {}
+    for i in range(1, self.token_size+1):
+      self.dictionaries[i] = self.construct(sentences, i)
+
+  def create_sentence(self):
+    '''
+    Creates a sentence by probabilistically choosing the next word using
+    dictionaries of variable token_size, and then selecting the word based on
+    the dictionary with the ideal number of destination states.
+    '''
+
+    preceding = (START,) * self.token_size
+    traversing = True
+    words = []
+
+    while traversing:
+      destinations = []
+      for d in self.dictionaries:
+        following, dest_count = self.next(self.dictionaries[d], preceding[-d:])
+        if following != START: destinations.append((dest_count, following))
+
+      traversing = following != STOP
+      if traversing:
+        # Choose the vaguest continuation (highest # destinations)
+        # NB: only kinda sorta works
+        following = max(destinations)[1]
+
+        # Choose the most specific continuation (lowest # destinations)
+        # NB: Currently broken
+        # following = min(destinations)[1]
+
         words.append(following)
         preceding = preceding[1:] + (following,)
     return words
@@ -148,7 +201,7 @@ class Generator(object):
         # tagged.append(self.pos_tag(s))
 
       # Save the training sentences for 'creativity' test
-      self.training_words = map(self.remove_padding, sentences)
+      self.training_words = sentences
 
       self.model = Model(sentences, token_size)
 
@@ -247,7 +300,6 @@ class Generator(object):
         separated = sentence[s[0]:s[1]]
         separated = separated.strip()
         split = separated.split(' ')
-        # padded = self.split_and_pad(split, self.token_size)
         sentences.append(split)
 
     return sentences
@@ -338,7 +390,7 @@ class Generator(object):
     Attempts to create a test-passing sentence within a certain number of tries.
     '''
 
-    for i in range(5):
+    for i in range(10):
       words = self.model.create_sentence()
       if self.test_sentence(words):
         words = self.remove_pos_tag(words)

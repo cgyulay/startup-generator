@@ -7,3 +7,5 @@ Using Markov chains to generate fake startup ideas: the monkeys on typewriters a
 pip install nltk
 python main.py
 ```
+
+

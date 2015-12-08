@@ -156,11 +156,11 @@ class MultiModel(Model):
       if traversing:
         # Choose the vaguest continuation (highest # destinations)
         # NB: only kinda sorta works
-        following = max(destinations)[1]
+        # following = max(destinations)[1]
 
         # Choose the most specific continuation (lowest # destinations)
         # NB: Currently broken
-        # following = min(destinations)[1]
+        following = min(destinations)[1]
 
         words.append(following)
         preceding = preceding[1:] + (following,)

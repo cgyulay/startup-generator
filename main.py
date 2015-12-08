@@ -7,8 +7,8 @@ corpus_path = 'corpora/crunchbase_descriptions_small.txt'
 # corpus_path = 'tagged_corpora/crunchbase_descriptions_2000.txt'
 # corpus_path = 'corpora/punctuation_test.txt'
 token_size = 3
-
+sentences = 2
 model = markov.Generator(corpus_path, token_size)
 for i in range(5):
-  s = model.create_sentence()
+  s = model.create_sentence(sentences)
   if s != None: print s + '\n'

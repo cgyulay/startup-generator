@@ -10,8 +10,7 @@ pip install pattern
 python main.py
 ```
 
-NB: if you want to do part-of-speech tagging yourself, you must have installed nltk's data (from python interpreter):
+NB: if you want to do part-of-speech tagging yourself, you must have installed nltk's pos data:
 ```
-import nltk
-nltk.download()
+python -m nltk.downloader maxent_treebank_pos_tagger
 ```

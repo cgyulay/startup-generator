@@ -128,7 +128,7 @@ class Model(object):
 
   def create_next_sentence(self, start):
 
-    # By default, start from a random beginning
+    # Start from a random beginning
     preceding = start
     traversing = True
     words = [start[-1]]

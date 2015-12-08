@@ -25,8 +25,12 @@ class Tagger(object):
       prev_time = time.time()
       tagged = []
 
+      # Open destination file and write on the fly
+      dest = open(dest_path, 'w')
+
       for i, s in enumerate(sentences):
-        tagged.append(self.pos_tag(s))
+        tagged = self.pos_tag(s)
+        dest.write(' '.join(tagged) + '\n')
 
         if i % 10 == 0:
           elapsed = time.time() - prev_time
@@ -35,10 +39,7 @@ class Tagger(object):
 
       print 'Completed POS tagging.'
 
-      # Save to file
-      dest = open(dest_path, 'w')
-      for s in tagged:
-        dest.write(' '.join(s) + '\n')
+      # Finish
       dest.close()
       print 'Finished writing to {0}'.format(dest_path)
 

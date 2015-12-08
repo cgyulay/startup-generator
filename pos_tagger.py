@@ -21,7 +21,7 @@ class Tagger(object):
       print 'Extracted {0} valid sentences from corpus.'.format(len(sentences))
 
       # Add POS tags
-      print 'Beggining POS tagging.'
+      print 'Beginning POS tagging.'
       prev_time = time.time()
       tagged = []
 
@@ -138,6 +138,6 @@ class Tagger(object):
     return sentences
 
 # Run
-corpus_path = 'corpora/crunchbase_descriptions_2000.txt'
+corpus_path = 'corpora/crunchbase_descriptions_.txt'
 dest_path = 'tagged_' + corpus_path
 tagger = Tagger(corpus_path, dest_path)

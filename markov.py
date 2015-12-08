@@ -110,6 +110,29 @@ class Model(object):
     traversing = True
     words = []
 
+    # first word
+    first = None 
+    iteration = 0
+
+    while traversing:
+      following = self.next(self.dictionary, preceding)[0]
+      traversing = following != STOP
+      if traversing:
+        words.append(following)
+        preceding = preceding[1:] + (following,)
+        if iteration == 0:
+          first = preceding
+          iteration += 1
+
+    return (words, first)
+
+  def create_next_sentence(self, start):
+
+    # By default, start from a random beginning
+    preceding = start
+    traversing = True
+    words = [start[-1]]
+
     while traversing:
       following = self.next(self.dictionary, preceding)[0]
       traversing = following != STOP
@@ -385,15 +408,32 @@ class Generator(object):
 
     return True
 
-  def create_sentence(self):
+  def create_followup(self, start):
+    words2 = []
+    for i in range(10):
+      words2 = self.model.create_next_sentence(start)
+      if self.test_sentence(words2):
+        words2 = self.remove_pos_tag(words2)
+        return words2
+
+  def create_followup_with_nouns(self, nouns):
+    '''
+    creates a followup sentence with at least one noun matching the given nouns
+    '''
+
+
+  def create_sentence(self, sentences=1):
     '''
     Attempts to create a test-passing sentence within a certain number of tries.
     '''
-
     for i in range(10):
-      words = self.model.create_sentence()
+      words, start = self.model.create_sentence()
+
       if self.test_sentence(words):
         words = self.remove_pos_tag(words)
+
+        if sentences > 1:
+          words = words + self.create_followup(start)
         return ' '.join(words)
     return None
 

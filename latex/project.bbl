@@ -5,4 +5,9 @@ Sepp Hochreiter and J{\"u}rgen Schmidhuber.
 \newblock Long short-term memory.
 \newblock {\em Neural computation}, 9(8):1735--1780, 1997.
 
+\bibitem{volfovsky2007long}
+Alexander Volfovsky.
+\newblock Markov chains and applications.
+\newblock 2007.
+
 \end{thebibliography}

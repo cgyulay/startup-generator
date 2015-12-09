@@ -3,44 +3,51 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: project.aux
 The style file: plain.bst
 Database file #1: project.bib
-You've used 1 entry,
+I was expecting a `,' or a `}'---line 8 of file project.bib
+ :   
+ :   title={A Maximum Entropy Model for Part-Of-Speech Tagging},
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+Warning--empty journal in volfovsky2007long
+You've used 2 entries,
             2118 wiz_defined-function locations,
-            505 strings with 4114 characters,
-and the built_in function-call counts, 371 in all, are:
-= -- 37
-> -- 13
+            509 strings with 4185 characters,
+and the built_in function-call counts, 574 in all, are:
+= -- 56
+> -- 20
 < -- 0
-+ -- 5
-- -- 4
-* -- 30
-:= -- 66
-add.period$ -- 3
-call.type$ -- 1
-change.case$ -- 5
++ -- 8
+- -- 6
+* -- 38
+:= -- 104
+add.period$ -- 6
+call.type$ -- 2
+change.case$ -- 9
 chr.to.int$ -- 0
-cite$ -- 1
-duplicate$ -- 11
-empty$ -- 30
-format.name$ -- 4
-if$ -- 73
+cite$ -- 3
+duplicate$ -- 21
+empty$ -- 47
+format.name$ -- 6
+if$ -- 113
 int.to.chr$ -- 0
-int.to.str$ -- 1
-missing$ -- 1
-newline$ -- 8
-num.names$ -- 2
-pop$ -- 3
+int.to.str$ -- 2
+missing$ -- 2
+newline$ -- 13
+num.names$ -- 4
+pop$ -- 9
 preamble$ -- 1
-purify$ -- 4
+purify$ -- 7
 quote$ -- 0
-skip$ -- 8
+skip$ -- 15
 stack$ -- 0
-substring$ -- 36
+substring$ -- 41
 swap$ -- 1
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 4
-warning$ -- 0
-while$ -- 4
-width$ -- 2
-write$ -- 13
+type$ -- 8
+warning$ -- 1
+while$ -- 6
+width$ -- 3
+write$ -- 22
+(There was 1 error message)

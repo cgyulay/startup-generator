@@ -14,23 +14,29 @@
 \begin{document}
 \maketitle{}
 
-\begin{multicols}{2}
 \section{Introduction}
 
-A description of the purpose, goals, and scope of your system or
-empirical investigation.  You should include references to papers you
-read on which your project and any algorithms you used are
-based. Include a discussion of whether you adapted a published
-algorithm or devised a new one, the range of problems and issues you
-addressed, and the relation of these problems and issues to the
-techniques and ideas covered in the course.
+Language modeling and text generation are important aspects of the greater
+field of natural language processing. In this paper, we use a naive language
+model based on Markovian assumptions to generate novel sentences from a text
+corpus. A major pain point for engineers and entrepreneurs lies in trying to
+determine what project or idea to work on. The specific application of text
+generation we examine in this paper seeks to alleviate this problem: our model creates fake, believable startup ideas using a dataset of company descriptions from the startup database Crunchbase.
+
+Our generative model is primarily based on Markov chains, which are decision
+processes that are characterized by the Markov property. A decision process is said to have the Markov property when any given state is independent of the preceding and following states. We can express this more formally:
+
+\[ P(X_n = x|X_0,\dots,X_{n-1}) = P(X_n = x|X_{n-1})\,\,\forall{n}\forall{x}\]
+
+Though the traditional form of the Markov chain was first produced by mathematician Andrey Markov, the research our implementation follows is
+provided by Alexander Volfovsky, 2007. \cite{volfovsky2007long} When generating sentences, the biggest difficulties we had were ensuring syntactical correctness and ensuring a desired level of creativity (i.e., not creating sentences that in large part already appear in the training corpus). We were able to dramatically improve syntax by accounting for parts of speech during training and sentence generation.
 
 \section{Background}
 
 
 \section{Related Work}
 
-For instance, \cite{hochreiter1997long}.
+For instance, \cite{hochreiter1997long}
 
 
 \section{Body 1}
@@ -110,5 +116,4 @@ explanation.  Your code should be clearly documented.
 \bibliographystyle{plain} 
 \bibliography{project}
 
-\end{multicols}
 \end{document}

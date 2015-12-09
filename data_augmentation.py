@@ -60,7 +60,7 @@ class DataAugment(object):
     return word[i:]
 
 # Run
-corpus_path = 'tagged_corpora/crunchbase_descriptions_2000.txt'
+corpus_path = 'tagged_corpora/crunchbase_descriptions_25000.txt'
 ext = corpus_path.rfind('.')
 dest_path = corpus_path[:ext] + '_generalized' + corpus_path[ext:]
 augment = DataAugment(corpus_path, dest_path)

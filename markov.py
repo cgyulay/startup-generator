@@ -451,7 +451,7 @@ class Generator(object):
     if self.multi_sent:
       start = (START,) * (self.token_size - 1) + ('We__PRP',)
       
-      followup = self.create_sentence_from_state(self.general_model, start, sentence.split(" "))
+      followup = self.create_sentence_from_state(self.general_model, start, sentence.split(' '))
       if followup:
         sentence = sentence + ' We ' + followup
 

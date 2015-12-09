@@ -416,11 +416,39 @@ class Generator(object):
         words2 = self.remove_pos_tag(words2)
         return words2
 
-  def create_followup_with_nouns(self, nouns):
+  def is_match(self, words1, words2):
+    '''
+    takes out the common buzz words and checks for same words
+    '''
+
+    # only need to filter one list since other one won't be able to match anyway
+    words1 = filter(lambda w: w != 'and' and w != 'the' and w != 'a'\
+       and w != 'an' and w != 'is' and w != 'for' and w != 'of' \
+       and w != 'provides' and w != 'enables' and w != 'to' and w != 'of' \
+       and w != 'on' and w != 'their' and w != 'company' and w != 'that' \
+       and w != 'online' and w != 'mobile' and w != 'its' and w != 'application' \
+       and w != 'platform' and w != 'product' and w != 'offers' and w != 'users' \
+       and w != 'web' and w != 'site' and w != 'website' and w != 'app' \
+       and w != 'create' and w != 'allows' and w != 'service' and w != 'services' \
+       and w != 'digital' and w != 'your' and w != 'develop' and w != 'focused' \
+       , words1)
+
+    return any(i in words1 for i in words2)
+
+  def create_followup_with_repeat(self, words):
+
     '''
     creates a followup sentence with at least one noun matching the given nouns
     '''
-
+    words3 = []
+    for i in range(100):
+      words2, start = self.model.create_sentence()
+      if self.test_sentence(words2):
+        # now need to find a matching word in both
+        words2 = self.remove_pos_tag(words2)
+        if self.is_match(words, words2):
+          return words2
+    return ["whoops"]
 
   def create_sentence(self, sentences=1):
     '''
@@ -433,7 +461,8 @@ class Generator(object):
         words = self.remove_pos_tag(words)
 
         if sentences > 1:
-          words = words + self.create_followup(start)
+          #words = words + self.create_followup(start)
+          words = words + self.create_followup_with_repeat(words)
         return ' '.join(words)
     return None
 

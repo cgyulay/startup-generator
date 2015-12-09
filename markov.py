@@ -3,7 +3,6 @@
 import re
 import itertools
 import random
-import nltk
 from unidecode import unidecode
 
 # Special tokens modeled after my #sick gamertag
@@ -99,46 +98,33 @@ class Model(object):
         total_destinations = len(dictionary.get(next_state, {}))
         return key, total_destinations
 
-  def create_sentence(self):
+  def create_sentence(self, preceding=None):
     '''
+    preceding: A tuple of words representing the desired starting state. Must
+               be of length < self.token_size.
+
     Creates a sentence by probabilistically choosing the next word given a
     preceding state, until receiving a stop token.
     '''
 
     # By default, start from a random beginning
-    preceding = (START,) * self.token_size
+    if preceding == None:
+      preceding = (START,) * self.token_size
+    elif len(preceding) > self.token_size:
+      preceding = preceding[:token_size]
+    elif len(preceding) < self.token_size:
+      preceding = (START,) * (self.token_size - len(preceding)) + preceding
+
     traversing = True
     words = []
 
-    # first word
-    first = None 
-    iteration = 0
-
     while traversing:
       following = self.next(self.dictionary, preceding)[0]
       traversing = following != STOP
       if traversing:
         words.append(following)
         preceding = preceding[1:] + (following,)
-        if iteration == 0:
-          first = preceding
-          iteration += 1
 
-    return (words, first)
-
-  def create_next_sentence(self, start):
-
-    # Start from a random beginning
-    preceding = start
-    traversing = True
-    words = [start[-1]]
-
-    while traversing:
-      following = self.next(self.dictionary, preceding)[0]
-      traversing = following != STOP
-      if traversing:
-        words.append(following)
-        preceding = preceding[1:] + (following,)
     return words
 
 
@@ -192,7 +178,7 @@ class MultiModel(Model):
 
 class Generator(object):
 
-  def __init__(self, corpus_path, token_size=2):
+  def __init__(self, corpus_path, token_size=2, multi_sent=False):
     '''
     corpus_path: Path to training corpus.
     token_size: Number of words in the model's context window.
@@ -201,6 +187,7 @@ class Generator(object):
     '''
 
     self.token_size = token_size
+    self.multi_sent = multi_sent
 
     with open(corpus_path) as f:
       text = f.read()
@@ -209,35 +196,27 @@ class Generator(object):
       # sentences = self.generate_sentences(text)
 
       # Works better but sacrifices more of the training data
-      sentences = self.generate_sentences_by_char(text)
+      # sentences = self.generate_sentences_by_char(text)
 
       # Uses a pos tagged, preprocessed corpus
-      # sentences = self.generate_sentences_from_preprocessed(text)
+      sentences = self.generate_sentences_from_preprocessed(text)
 
       print 'Extracted {0} valid sentences from corpus.'.format(len(sentences))
       print '-----\n'
 
-      # Add POS tags to training sentences
-      # NB: This takes f*cking forever
-      # tagged = []
-      # for s in sentences:
-        # tagged.append(self.pos_tag(s))
-
       # Save the training sentences for 'creativity' test
       self.training_words = sentences
-
       self.model = Model(sentences, token_size)
 
-  def pos_tag(self, words):
-    '''
-    words: Sentence in list form.
-
-    Uses nltk to add part of speech tags to each word in a provided list. 
-    '''
-
-    tagged = nltk.pos_tag(words)
-    combined = ['__'.join(w) for w in tagged]
-    return combined
+    # If we want to create multi-sentence output, we also need to load the
+    # corresponding generalized corpus
+    if multi_sent:
+      ext = corpus_path.rfind('.')
+      generalized_path = corpus_path[:ext] + '_generalized' + corpus_path[ext:]
+      with open(generalized_path) as f:
+        text = f.read()
+        sentences = self.generate_sentences_from_preprocessed(text)
+        self.general_model = Model(sentences, token_size)
 
   def remove_pos_tag(self, words):
     '''
@@ -411,29 +390,48 @@ class Generator(object):
   def create_followup(self, start):
     words2 = []
     for i in range(10):
-      words2 = self.model.create_next_sentence(start)
+      words2 = self.model.create_sentence((start,))
       if self.test_sentence(words2):
         words2 = self.remove_pos_tag(words2)
         return words2
 
   def create_followup_with_nouns(self, nouns):
     '''
-    creates a followup sentence with at least one noun matching the given nouns
+    Creates a followup sentence with at least one noun matching the given nouns.
     '''
 
-
-  def create_sentence(self, sentences=1):
+  def create_sentence_from_state(self, model, preceding=None):
     '''
+    model: The Markov chain model from which to generate text.
+    preceding: A tuple of words representing the desired starting state. Must
+               be of length < self.token_size.
+
     Attempts to create a test-passing sentence within a certain number of tries.
     '''
+
     for i in range(10):
-      words, start = self.model.create_sentence()
-
+      words = model.create_sentence(preceding)
       if self.test_sentence(words):
-        words = self.remove_pos_tag(words)
-
-        if sentences > 1:
-          words = words + self.create_followup(start)
+        words = self.remove_pos_tag(words)  
         return ' '.join(words)
     return None
+
+  def create_sentence(self, previous=None):
+    '''
+    previous: The sentence preceding the next one to generate, if it exists.
+
+    Attempts to create a test-passing sentence within a certain number of tries.
+    '''
+    
+    # Create sentence from random starting state
+    sentence = self.create_sentence_from_state(self.model)
+
+    # If we want multiple sentences, add from generalized model
+    if self.multi_sent:
+      start = (START,) * (self.token_size - 1) + ('We__PRP',)
+      followup = self.create_sentence_from_state(self.general_model, start)
+      if followup:
+        sentence = sentence + ' We ' + followup
+
+    return sentence
 

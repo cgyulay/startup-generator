@@ -395,12 +395,27 @@ class Generator(object):
         words2 = self.remove_pos_tag(words2)
         return words2
 
-  def create_followup_with_nouns(self, nouns):
+  def is_match(self, words1, words2):
     '''
-    Creates a followup sentence with at least one noun matching the given nouns.
+    takes out the common buzz words and checks for same words
     '''
 
-  def create_sentence_from_state(self, model, preceding=None):
+    # only need to filter one list since other one won't be able to match anyway
+    words1 = filter(lambda w: w != 'and' and w != 'the' and w != 'a'\
+       and w != 'an' and w != 'is' and w != 'for' and w != 'of' \
+       and w != 'provides' and w != 'enables' and w != 'to' and w != 'of' \
+       and w != 'on' and w != 'their' and w != 'company' and w != 'that' \
+       and w != 'online' and w != 'mobile' and w != 'its' and w != 'application' \
+       and w != 'platform' and w != 'product' and w != 'offers' and w != 'users' \
+       and w != 'web' and w != 'site' and w != 'website' and w != 'app' \
+       and w != 'create' and w != 'allows' and w != 'service' and w != 'services' \
+       and w != 'digital' and w != 'your' and w != 'develop' and w != 'focused' \
+       , words1)
+
+    return any(i in words1 for i in words2)
+
+  def create_sentence_from_state(self, model, preceding=None, prevWords=None):
+
     '''
     model: The Markov chain model from which to generate text.
     preceding: A tuple of words representing the desired starting state. Must
@@ -409,12 +424,18 @@ class Generator(object):
     Attempts to create a test-passing sentence within a certain number of tries.
     '''
 
-    for i in range(10):
+    for i in range(100):
       words = model.create_sentence(preceding)
+
       if self.test_sentence(words):
-        words = self.remove_pos_tag(words)  
-        return ' '.join(words)
+        words = self.remove_pos_tag(words) 
+        if prevWords: 
+          if self.is_match(prevWords, words):
+            return ' '.join(words)
+        else:
+          return ' '.join(words)
     return None
+
 
   def create_sentence(self, previous=None):
     '''
@@ -429,7 +450,8 @@ class Generator(object):
     # If we want multiple sentences, add from generalized model
     if self.multi_sent:
       start = (START,) * (self.token_size - 1) + ('We__PRP',)
-      followup = self.create_sentence_from_state(self.general_model, start)
+      
+      followup = self.create_sentence_from_state(self.general_model, start, sentence.split(" "))
       if followup:
         sentence = sentence + ' We ' + followup
 

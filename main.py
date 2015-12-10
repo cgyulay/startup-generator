@@ -7,7 +7,7 @@ print 'Building model...this could take a few seconds.\n'
 # corpus_path = 'corpora/crunchbase_descriptions.txt'
 # corpus_path = 'corpora/crunchbase_descriptions_small.txt'
 # corpus_path = 'corpora/punctuation_test.txt'
-corpus_path = 'tagged_corpora/crunchbase_descriptions_25000.txt'
+corpus_path = 'tagged_corpora/crunchbase_descriptions_50000.txt'
 
 token_size = 3
 multi_sent = False

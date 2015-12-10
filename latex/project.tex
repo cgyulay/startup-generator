@@ -1,19 +1,21 @@
 \documentclass[11pt]{article}
 \usepackage{common}
 \usepackage{multicol}
+\usepackage{amsmath}
 
 \title{Generating Startup Ideas with Markov Chains}
 \author{
-  \noindent\makebox[0.57\textwidth][l]{Colton Gyulay} \hfill
+  \noindent\makebox[0.57\textwidth][l]{\textbf{Colton Gyulay}} \hfill
   \texttt{cgyulay@college.harvard.edu}\\
-  Antuan Tran \hfill
+  \textbf{Antuan Tran} \hfill
   \texttt{antuantran@college.harvard.edu}\\
-  Evan Gastman \hfill
+  \textbf{Evan Gastman} \hfill
   \texttt{evangastman@college.harvard.edu}
 }
 \begin{document}
 \maketitle{}
 
+\begin{multicols}{2}
 \section{Introduction}
 
 Language modeling and text generation are important aspects of the greater
@@ -25,21 +27,25 @@ generation we examine in this paper seeks to alleviate this problem: our model c
 
 Our generative model is primarily based on Markov chains, which are decision
 processes that are characterized by the Markov property. A decision process is said to have the Markov property when any given state is independent of the preceding and following states. We can express this more formally:
-
-\[ P(X_n = x|X_0,\dots,X_{n-1}) = P(X_n = x|X_{n-1})\,\,\forall{n}\forall{x}\]
-
+\begin{multline}
+  P(X_n = x|X_0,\dots,X_{n-1}) =\\
+  P(X_n = x|X_{n-1})\,\,\forall{n}\forall{x}
+\end{multline}
 Though the traditional form of the Markov chain was first produced by mathematician Andrey Markov, the research our implementation follows is
-provided by Alexander Volfovsky, 2007. \cite{volfovsky2007long} When generating sentences, the biggest difficulties we had were ensuring syntactical correctness and ensuring a desired level of creativity (i.e., not creating sentences that in large part already appear in the training corpus). We were able to dramatically improve syntax by accounting for parts of speech during training and sentence generation.
+provided by Alexander Volfovsky, 2007.\cite{volfovsky2007} When generating sentences, the biggest difficulties we had were ensuring syntactical correctness and ensuring a desired level of creativity (i.e., not creating sentences that in large part already appear in the training corpus). We were able to dramatically improve syntax by accounting for parts of speech during training and sentence generation. Part-of-speech tagging was done using a maximum entropy model
+trained on the University of Pennsylvania's Treebank corpus.\cite{ratnaparkhi1996} To ensure creativity, we used a bag-of-words model to prevent overlap beyond a certain threshhold between generated text and individual sentences in the corpus. The Model section provides a deeper discussion of these systems.
 
-\section{Background}
+Choosing the correct state size (i.e., the number of tokens in a preceding state) was a critical part of producing strong results. A drawback of using Markov chains in language modeling is that they lack the ability to account for long-term dependencies in the text. For example, a subject and verb that are far apart\textemdash a greater distance that the state size, to be exact\textemdash may not agree in number. We found the ideal state size to be 3 or 4. When choosing a longer state size, these errors tend to disappear as generated text mirrors training text more closely. A shorter state size, however, confers the benefit of greater creativity. In the case of creating startup ideas, the more creative and whimsical, the better.
 
+Using Markov chains for text modeling and generation fell in line nicely with CS 182's study of Markov decision processes and other probabilistic state transition models. Though deterministic in nature, our model was able to create novel and funny startup ideas\textemdash some of which we may be pitching to investors soon.
 
 \section{Related Work}
 
-For instance, \cite{hochreiter1997long}
+The basics of Markov chains were explored through two primary sources: Alexander Volfovsky's paper on Markov chains and applications\cite{volfovsky2007} and James Norris' book \textit{Markov Chains}.\cite{norris1998} While Norris provided a more fundamental look at decision processes, focusing on the transition model and studying the underlying probability distribution, Volfovsky supplied a more accessible explanation in regard to application.
 
+The most relevant work came from Grzegorz Szymanski and Zygmnut Ciota, who used hidden Markov models to build transition probabilities, and these HMMs to build Markov chains for generating text.\cite{szymanski2014}
 
-\section{Body 1}
+\section{Model}
 
 A clear specification of the algorithm(s) you used and a description
 of the main data structures in the implementation. Include a
@@ -116,4 +122,5 @@ explanation.  Your code should be clearly documented.
 \bibliographystyle{plain} 
 \bibliography{project}
 
+\end{multicols}
 \end{document}

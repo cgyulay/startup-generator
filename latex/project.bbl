@@ -1,11 +1,21 @@
 \begin{thebibliography}{1}
 
-\bibitem{hochreiter1997long}
-Sepp Hochreiter and J{\"u}rgen Schmidhuber.
-\newblock Long short-term memory.
-\newblock {\em Neural computation}, 9(8):1735--1780, 1997.
+\bibitem{norris1998}
+James Norris.
+\newblock Markov chains.
+\newblock pages 1--56.
 
-\bibitem{volfovsky2007long}
+\bibitem{ratnaparkhi1996}
+Adwait Ratnaparkhi.
+\newblock A maximum entropy model for part-of-speech tagging.
+\newblock 1996.
+
+\bibitem{szymanski2014}
+Grzegorz Szymanski and Zygmnut Ciota.
+\newblock Hidden markov models suitable for text generation.
+\newblock 2014.
+
+\bibitem{volfovsky2007}
 Alexander Volfovsky.
 \newblock Markov chains and applications.
 \newblock 2007.

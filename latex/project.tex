@@ -50,9 +50,16 @@ We would be remiss not to mention a final inspiration for this project: legendar
 
 \section{Dataset}
 
-INCOMPLETE
 
-We should talk about our dataset here. This should include conversation on where we got it, how we preprocessed (removing sentences with bad punctuation like quotes or parens, pos tagging). Talk about how pos tagging disambiguates words with multiple use cases. Also we should talk about the data augmentation we did for multi-sentence generation (converting sentences of format ``companyname 3rdpersonverb'' to format ``We 1stpersonverb''). We should also talk about padding sentences with start/stop tokens probably.
+We collected 150,000 company descriptions from Crunchbase, all of them being one sentence in length. In cleaning up the descriptions for our use, we removed sentences with difficult punctuation, including question marks, exclamation points, quotations, parentheses, and brackets. As the Markov property is memoryless, if we have a sentence that contains a start quote, we are not guaranteed to have an end quote, which would make the sentence unnecessarily confusing and simply wrong. Similarly, we could possibly end a sentence with a question mark where it does not make sense with the earlier chosen words. Therefore, we removed the possibility of these confusions in the cleaning of the text.
+
+Additionally, in the preprocessing phase, we used the python library Natural Language Toolkit (NLT) to tag each of the words in the corpus with its part of speech (POS). This was helpful in generating more grammatically correct sentences because it resolved ambiguity where a single word could have multiple POS associations. Consider, for example, the word 'diet,' which can be a noun or a verb. In our transition dictionary, instead of one key for 'diet', this word has two distinct keys, one as a noun and the other as a verb, such that when we request a next word according to the Markov model, the word is used in the right context with respect to POS. When we actually display this sentence after its been generated, all the POS tags have been stripped. 
+
+In order to generate multi-sentence company descriptions, we had to consider the language flow from one sentence to the next. As most of the company descriptions have the format "company-name 3rd-person-verb," it would make little sense if the second sentence began with a totally different company name, even if the description of that company was complementary to the first. To address this problem, we created a different model with the"company-name 3rd-person-verb," replaced with ``We 1st-person-verb''. This generalizes the descriptions since it removes the connections tied to specific company names in the word transitions. When generating a follow up sentence, we can use the generalized model.
+
+Lastly, in creating complete sentences, we need to know where to begin and where to end. We used special start and stop tokens - unique character that do not appear anywhere in the corpus - to show where a sentence begins or ends. In making the transition dictionary, we append the appropriate number of start tokens to the beginnings of sentences corresponding to our token size and one stop token to the end of the sentences. This way, when we first choose how to begin a sentence, we have all of the first words as the values to which the start tokens can transition. As we generate the words, upon reaching a stop token, we are able to end the sentence and return it, knowing that we have reached a word that ends a sentence in the corpus.
+
+The creation of our transition dictionary from our data is covered in the next section.
 
 \section{Model}
 
@@ -126,7 +133,15 @@ The final key algorithm in our Markov chain model was the one used to generate s
 
 After generating a sentence, creativity is ensured by setting a maximum threshold for shared vocabulary between the generated sentence and any single other sentence in the corpus. If there are too many overlapping words, the sentence is rejected immediately. In practice, a threshold ratio around 0.6 offered the right balance between creativity and semantic coherence.
 
-\section{Body 2}
+\subsection{Multi-Sentence Generation}
+To create a contextually sensible follow up sentence to the first, we had a few strategies. 
+
+One initial strategy was to generate the second sentence with the same beginning word as the first. In almost all cases, the first word is the company name, so the first few words of the sentence would align, but once a different word entered the sentence, the two would diverge quickly. 
+
+In order to give the second sentence more freedom, we allow the sentence to begin anywhere but enforce an intersection of the two sentences in any non-common word in the sentence. The common words, which are a collection of words that we find are prevalent in the descriptions, are filtered out of one sentence then the two sentences are checked for a shared word. The second sentence is regenerated until such a match occurs. We find that these sentences are also not perfect complements to the initial, but they do provide a better-suited match since the matching word can influence the overlapping meaning in two directions - previous words and following words. This is superior to matching solely on the starts of the sentences, which tend to be more vague and can only influence the following words. 
+
+With the success of matching a word from one sentence to the next, we experimented with the next logical step; that is, matching two words. However, running this implementation and giving the second sentence even 100 tries to generate a sentence that matches two words yields results only 30\% of the time for a training set with 25,000 descriptions. In attempting to bring more dependencies to the generated chain of words, we realize that we are trying to give some memory to a memoryless process.
+
 
 \section{Experiments}
 INCOMPLETE
@@ -137,6 +152,26 @@ a discussion of examples that illustrate major features of your
 system. Testing is a critical part of system construction, and the
 scope of your testing will be an important component in our
 evaluation. Discuss what you learned from the implementation.
+
+\subsection{Multi-Sentence Evaluation}
+
+Generating ideas with multiple sentences is often hit or miss. A example of a successful description where the two sentences align is: 
+\begin{quote} 
+Iqua develops headsets and handsfree devices to enhance security, social media sharing, and advertising. We develop security devices and security systems in the industry today.
+\end{quote}
+The idea in the first sentence is further developed in the second - the company makes the headset and devices with all these features, and their focus is shown to be the security feature. In this example, there are two overlapping words - devices and security. 
+
+Another success where the second sentence leads naturally from the first is:
+\begin{quote}
+Nova Ratio develops and markets database automation software and solutions for digital signage networks. We develop software solutions for global organizations.
+\end{quote}
+In this case, the specifics are not explained as much as the role and reach of the company. The first sentence describes what the company does and the second explains that its customers are organizations all over the globe.
+
+A humorous case where the word matching is less that ideal is where the two words are "social" and "media":
+\begin{quote}
+Rentoid offers a rental site that lists apartments and flats, and a social media platform for pragmatic idealists working towards individual and collective progress. We are a social media website that rewards its audience with a virtual currency casino arcade that benefits game publishers, brands and media properties collect and analyze feedback.
+\end{quote}
+There are four ideas in these two sentences, with two of them overlapping with the phrase "social media." The topic ranges from a rental site, to a social media platform for idealists, which transitions to a site with a virtual casino, and ends up helping companies collect feedback. The humor is that the social media site for idealists leads them to virtual gambling, and that the site is so multi-faceted. With some creativity, one could connect the ideas into some sort of tangible proposal, but we would not consider the generated idea as successful as it far from a natural progression of thought.
 
 LEAVING THIS TABLE IN HERE IN CASE WE NEED IT
 \begin{table}
@@ -157,6 +192,7 @@ INCOMPLETE and might not be necessary given our Model section?
 
 \subsection{Results}
 INCOMPLETE and maybe unnecessary
+
 For algorithm-comparison projects: a section reporting empirical comparison results preferably presented graphically.
 
 If we get some good multi-sentence stuff done we should def include.
@@ -172,7 +208,38 @@ Jewelry for the iPhone.
 \end{quote}
 
 \subsection{Discussion}
-INCOMPLETE
+
+
+While we are excited about the progress we have made, the sentences we've generated, and the familiarity we now have with implementing Markov chains, we recognize considerable room for progress in areas like (1) improving our hit rate, and (2) enforcing semantic meaning in sentence generation. First, we will address the success framework we used and then discuss ways to improve semantic meaning going forward. 
+\newline
+\textit{Sentence Success}
+\newline
+We did not figure out a way to formalize sentence success. In part this was the nature of the project and in part because possible evaluative techniques we considered required crowd sourcing to an extent that we could not manage given our timeline. That said, we evaluated sentences based on their effect on us and our friends. Did a sentence make us laugh or cause us to scratch our heads and say 'hmmm', or did it simply not make sense? Again, though, this admittedly subjective evaluation is consistent with the nature of the project, which is meant to provide playful and perhaps inspirational content based on Markov Chains. The system we realized went as follows:
+
+Successful sentences passed one or more of the following tests:
+\begin{itemize}
+
+        \item The sentence made us laugh based on the unusual blend of ideas from the sentences in the corpus.
+
+        \item The sentence depicted a new company that could exist at present or in future.\textit{ex. Soligenix develops biodefense vaccines and therapeutics for the prevention and treatment of breast tumors} 
+
+        \item The sentence managed to trigger a sequence of thoughts beyond the scope of the sentence. \textit{ex. 'Datameer provides business users with an array of quilting supplies and a quilting channel on YouTube.'} While this sentence struck us as comical because of the idea of a bunch of businessmen in suits quilting as they waited on the Datameer customer support line (passes the humor question), it also inspired us to think about potential new products that leverage Youtube as a teaching guide. A company that has a project-based learning channel on Youtube and provides content/materials for experiments in schools, was a non-trivial idea that came to mind. \ldots 
+
+\end{itemize}
+
+Meanwhile, unsuccessful sentences failed primarily because they failed to preserve basic syntax such as grammatical number or failed to preserve context (placement of proper nouns in nonsensical places). At first, we thought an evaluative question would consider the 'boringness' of a sentence, but we quickly realized that sentences that struck one person as boring resonated with someone else. The nature of these sentences is that the reviews they get absolutely depend on the experiences and associations of the person evaluating them. 
+
+The way we had hoped to generate a success test was through the use of mechanical turks or by amassing interest on a Twitter feed and determining successful sentences based on likes/retweets. By generating a large enough data set of reviews, we imagined we would be able to generate heuristics for humor/creativity/inspirability. This is yet to be implemented and applied. 
+\newline
+\textit{Contextual/Semantic Meaning }
+\newline
+Throughout the project we experimented incrementally in trying to make our sentences make more sense, while maintaining their originality. We experimented with the effects of token size on sentence creativity and grammar, and ways to ensure originality (in the end, opting for a bag of words approach). As we got farther and farther along in generating better sentences more frequently, we began to think about how we might enforce semantics. Our naive multi-sentence generation currently works (as discussed earlier) by enforcing a structure and generating a new sentence based on an overlapping word with the previous one. We spent considerable time looking into more intelligence methods in the area of word and sentence embeddings.
+
+While this approach is beyond what we could accomplish given our timeline, one of our next steps would be to try to implement sentence embedding using long short-term memory networks as described by Microsft Researcher Hamid Pangi et al:
+"[Learned using sentence pairs,] sentence embedding can better discover salient words and topics in a sentence, and thus is more suitable for tasks that require computing semantic similarities between text strings."\cite{palangi2015} By mapping sentences into semantic representation vector, we could implement a semantic filter based on the distance between the first sentence vector and the newly generated sentence. We expect the hit rate would improve drastically with semantic meaning. 
+
+On a more general note, this project has been a very interesting introduction to NLP and we now look forward to exploring this field further. 
+
 
 \appendix
 

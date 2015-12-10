@@ -412,8 +412,11 @@ class Generator(object):
        and w != 'digital' and w != 'your' and w != 'develop' and w != 'focused' \
        , words1)
 
-    return any(i in words1 for i in words2)
-
+    #return any(i in words1 for i in words2)
+    amount = set(words1).intersection(set(words2))
+    if len(amount) > 1:
+      return True
+    return False
   def create_sentence_from_state(self, model, preceding=None, prevWords=None):
 
     '''

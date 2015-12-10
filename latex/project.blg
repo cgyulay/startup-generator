@@ -3,6 +3,7 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: project.aux
 The style file: plain.bst
 Database file #1: project.bib
+Warning--I didn't find a database entry for "palangi2015"
 Warning--to sort, need author or key in bird2015
 Warning--to sort, need author or key in desmedt2015
 Warning--empty author in bird2015
@@ -15,7 +16,7 @@ Warning--empty journal in szymanski2014
 Warning--empty journal in volfovsky2007
 You've used 7 entries,
             2118 wiz_defined-function locations,
-            528 strings with 4512 characters,
+            529 strings with 4523 characters,
 and the built_in function-call counts, 1623 in all, are:
 = -- 158
 > -- 43
@@ -54,4 +55,4 @@ warning$ -- 10
 while$ -- 15
 width$ -- 8
 write$ -- 64
-(There were 10 warnings)
+(There were 11 warnings)

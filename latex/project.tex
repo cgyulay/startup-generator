@@ -138,10 +138,9 @@ To create a contextually sensible follow up sentence to the first, we had a few 
 
 One initial strategy was to generate the second sentence with the same beginning word as the first. In almost all cases, the first word is the company name, so the first few words of the sentence would align, but once a different word entered the sentence, the two would diverge quickly. 
 
-In order to give the second sentence more freedom, we allow the sentence to begin anywhere but enforce an intersection of the two sentences in any non-common word in the sentence. The common words, which are a collection of words that we find are prevalent in the descriptions, are filtered out of one sentence then the two sentences are checked for a shared word. The second sentence is regenerated until such a match occurs. We find that these sentences are also not perfect complements to the initial, but they do provide a better-suited match since the matching word can influence the overlapping meaning in two directions - previous words and following words. This is superior to matching solely on the starts of the sentences, which tend to be more vague and can only influence the following words. 
+In order to give the second sentence more freedom, we allow the sentence to begin anywhere but enforce an intersection of the two sentences in any non-common word in the sentence. The common words, which are a collection of words that we find are prevalent in the descriptions, are filtered out of one sentence then the two sentences are checked for a shared word. The second sentence is regenerated until such a match occurs. We find that these sentences are also not perfect complements to the initial, but they do provide a better-suited match since the matching word can influence the overlapping meaning in two directions \textemdash previous words and following words. This is superior to matching solely on the starts of the sentences, which tend to be more vague and can only influence the following words. 
 
-With the success of matching a word from one sentence to the next, we experimented with the next logical step; that is, matching two words. However, running this implementation and giving the second sentence even 100 tries to generate a sentence that matches two words yields results only 30\% of the time for a training set with 25,000 descriptions. In attempting to bring more dependencies to the generated chain of words, we realize that we are trying to give some memory to a memoryless process.
-
+With the success of matching a word from one sentence to the next, we experimented with the next logical step; that is, matching multiple words. However, running this implementation and giving the second sentence even 100 tries to generate a sentence that matches two words yields results only 30\% of the time for a training set with 50,000 descriptions. In attempting to bring more dependencies to the generated chain of words, we realize that we are trying to give some memory to a memoryless process.
 
 \section{Experiments}
 INCOMPLETE
@@ -172,23 +171,6 @@ A humorous case where the word matching is less that ideal is where the two word
 Rentoid offers a rental site that lists apartments and flats, and a social media platform for pragmatic idealists working towards individual and collective progress. We are a social media website that rewards its audience with a virtual currency casino arcade that benefits game publishers, brands and media properties collect and analyze feedback.
 \end{quote}
 There are four ideas in these two sentences, with two of them overlapping with the phrase "social media." The topic ranges from a rental site, to a social media platform for idealists, which transitions to a site with a virtual casino, and ends up helping companies collect feedback. The humor is that the social media site for idealists leads them to virtual gambling, and that the site is so multi-faceted. With some creativity, one could connect the ideas into some sort of tangible proposal, but we would not consider the generated idea as successful as it far from a natural progression of thought.
-
-LEAVING THIS TABLE IN HERE IN CASE WE NEED IT
-\begin{table}
-  \centering
-  \begin{tabular}{ll}
-    \toprule
-    & Score \\
-    \midrule
-    Approach 1 & \\
-    Approach 2 & \\
-    \bottomrule
-  \end{tabular}
-  \caption{Description of the results.}
-\end{table}
-
-\subsection{Methods and Models}
-INCOMPLETE and might not be necessary given our Model section?
 
 \subsection{Results}
 INCOMPLETE and maybe unnecessary
@@ -235,7 +217,7 @@ The way we had hoped to generate a success test was through the use of mechanica
 \newline
 Throughout the project we experimented incrementally in trying to make our sentences make more sense, while maintaining their originality. We experimented with the effects of token size on sentence creativity and grammar, and ways to ensure originality (in the end, opting for a bag of words approach). As we got farther and farther along in generating better sentences more frequently, we began to think about how we might enforce semantics. Our naive multi-sentence generation currently works (as discussed earlier) by enforcing a structure and generating a new sentence based on an overlapping word with the previous one. We spent considerable time looking into more intelligence methods in the area of word and sentence embeddings.
 
-While this approach is beyond what we could accomplish given our timeline, one of our next steps would be to try to implement sentence embedding using long short-term memory networks as described by Microsft Researcher Hamid Pangi et al:
+While this approach is beyond what we could accomplish given our timeline, one of our next steps would be to try to implement sentence embedding using long short-term memory networks as described by Microsoft Researcher Hamid Pangi et al:
 "[Learned using sentence pairs,] sentence embedding can better discover salient words and topics in a sentence, and thus is more suitable for tasks that require computing semantic similarities between text strings."\cite{palangi2015} By mapping sentences into semantic representation vector, we could implement a semantic filter based on the distance between the first sentence vector and the newly generated sentence. We expect the hit rate would improve drastically with semantic meaning. 
 
 On a more general note, this project has been a very interesting introduction to NLP and we now look forward to exploring this field further. 

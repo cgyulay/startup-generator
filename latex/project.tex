@@ -249,7 +249,7 @@ For simplicity, the word ``treat'' has no available transitions, though in our m
 
 \section{System Description}
 
-Appendix B explains the setup necessary to start generating startup ideas using our model. Start by cloning the repository here: \url{https://github.com/cgyulay/startup-generator}. Basic setup is outlined in the project's \texttt{README}, but explanations will be provided here for completeness. An installation of python is assumed. The only python library required for sentence generation using a preprocessed corpus is \texttt{unidecode}. If using a non-preprocessed corpus, the libraries \texttt{nltk} and \texttt{pattern} are also necessary. To run part-of-speech tagging, it's necessary to install \texttt{nltk}'s taggers from the command-line like so:
+Appendix B explains the setup necessary to start generating startup ideas using our model. Start by cloning the repository here: \url{https://github.com/cgyulay/startup-generator}. A quick start is outlined in the project's \texttt{README}, but explanations will be provided here for completeness. An installation of python is assumed. The only python library required for sentence generation using a preprocessed corpus is \texttt{unidecode}. If using a non-preprocessed corpus, the libraries \texttt{nltk} and \texttt{pattern} are also necessary. To run part-of-speech tagging, it's necessary to install \texttt{nltk}'s taggers from the command-line like so:
 \begin{lstlisting}
 python -m nltk.downloader maxent_treebank_pos_tagger
 python -m nltk.downloader averaged_perceptron_tagger

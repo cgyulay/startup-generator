@@ -2,6 +2,13 @@
 Using Markov chains to generate fake startup ideas: the monkeys on typewriters approach to founding a company.
 
 ----
+####Quick start
+```
+pip install unidecode
+python main.py
+```
+
+----
 ####Setup
 ```
 pip install nltk

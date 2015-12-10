@@ -1,6 +1,8 @@
 \documentclass[11pt]{article}
 \usepackage{common}
-\usepackage{multicol}
+\usepackage{blkarray}
+\usepackage{url}
+\usepackage{listings}
 
 \title{Generating Startup Ideas with Markov Chains}
 \author{
@@ -44,13 +46,17 @@ The most relevant work came from Grzegorz Szymanski and Zygmnut Ciota, who used 
 Part-of-speech tagging was considered out of scope for this project, so we used the python library Natural Language Toolkit.\cite{bird2015} NLTK uses a maximum entropy model trained on the UPenn Treebank dataset, which includes standard tagged corpora like the Wall Street Journal and the Brown Corpus.\cite{ratnaparkhi1996} When augmenting our dataset, we also made use of the library Pattern for swapping verb conjugation between singular and plural. Pattern is based off of the work of Tom De Smedt and Walter Daelemans.
 \cite{desmedt2015}
 
+We would be remiss not to mention a final inspiration for this project: legendary computer scientist and startup guru Paul Graham. His penchant for describing new ideas as the \(X for Y\) (think ``the Uber for laundry'') as well as his essay ``Ideas for Startups'' make him the perfect example of a human-powered generative model of startup ideas.\cite{graham2005} We have simply extended his life's work programmatically.
+
 \section{Dataset}
 
-We should talk about our dataset here. This should include conversation on where we got it, how we preprocessed (removing sentences with bad punctuation like quotes or parens, pos tagging). Also we should talk about the data augmentation we did for multi-sentence generation (converting sentences of format companyname 3rdpersonverb to format We 1stpersonverb).
+INCOMPLETE
+
+We should talk about our dataset here. This should include conversation on where we got it, how we preprocessed (removing sentences with bad punctuation like quotes or parens, pos tagging). Talk about how pos tagging disambiguates words with multiple use cases. Also we should talk about the data augmentation we did for multi-sentence generation (converting sentences of format ``companyname 3rdpersonverb'' to format ``We 1stpersonverb''). We should also talk about padding sentences with start/stop tokens probably.
 
 \section{Model}
 
-Our model's primary algorithm constructs a dictionary of state transitions: it  learns the underlying probability distribution by accumulating each preceding state's following state, and normalizing to 1. This process of accumulating preceding and following states essentially creates a phrase/word co-occurrence matrix \(M\), where the phrase contains \(k\) words. See Algorithm~\ref{alg:1}.
+Our model's primary algorithm constructs a dictionary of state transitions: it  learns the underlying probability distribution by accumulating each preceding state's following state. This process of accumulating preceding and following states essentially creates a phrase/word co-occurrence matrix \(M\), where the phrase contains \(k\) words. See Algorithm~\ref{alg:1}.
 
 \begin{algorithm}
   \begin{algorithmic}
@@ -59,10 +65,10 @@ Our model's primary algorithm constructs a dictionary of state transitions: it  
       \For{$i$ in range(len($sentence$) - $k$)}
         \State{$preceding \gets$ tuple($sentence[i:i+k]$)}
         \State{$following \gets sentence[i+k]$}
-        \If{$preceding$ not in $M$}
+        \If{$preceding \notin M$}
           {$M \gets \{\}$}
         \EndIf
-        \If{$following$ not in $M[preceding]$}
+        \If{$following \notin M[preceding]$}
           {$M[preceding][following] \gets 1$}
         \Else
           {$ M[preceding][following] \gets M[preceding][following]+1$}
@@ -71,15 +77,60 @@ Our model's primary algorithm constructs a dictionary of state transitions: it  
     \EndFor
     \EndProcedure{}
   \end{algorithmic}
-  \caption{Building transition probabilities.}
+  \caption{Builds transition probabilities.}
   \label{alg:1}
 \end{algorithm}
 
-The next important algorithm we implemented generates text given 
+The next important algorithm we implemented picks the following word given a preceding state by sampling from the distribution at that state. Each preceding state is represented as a row in \(M\), where the total number of following states is equal to the number of times the preceding state appears in the corpus. By picking randomly from the total, the algorithm effectively normalizes to 1. See Algorithm~\ref{alg:2}.
+
+\begin{algorithm}
+  \begin{algorithmic}
+    \Procedure{NextWord}{$preceding$}
+    \State{$total \gets$ sum($M$.itervalues())}
+    \State{$pick \gets$ random.randint($0$, $total-1$)}
+    \State{$accumulated \gets 0$}
+
+    \For{each $key$, $weight$ in $M$.iteritems()}
+      \State{$accumulated \gets accumulated + weight$}
+      \If{$pick < accumulated$}
+        {return $key$}
+      \EndIf
+    \EndFor
+    \EndProcedure{}
+  \end{algorithmic}
+  \caption{Selects next word given previous state.}
+  \label{alg:2}
+\end{algorithm}
+
+The final key algorithm in our Markov chain model was the one used to generate sentences. It can generate sentences from an arbitrary starting state, though a blank start was primarily used to create sentences from scratch. The algorithm continues to accumulate words provided by Algorithm~\ref{alg:2} until receiving a stop token. As a new word is added to the sentence, the preceding state is updated to include the \(k\) most recent tokens. This is where the startup ideas take their shape. See Algorithm~\ref{alg:3}.
+
+\begin{algorithm}
+  \begin{algorithmic}
+    \Procedure{CreateSentence}{$preceding$}
+    \State{$traversing \gets True$}
+    \State{$words \gets []$}
+
+    \While{$traversing$}
+      \State{$following \gets$ NextWord($preceding$)}
+      \State{$traversing \gets following \neq$ STOP}
+      \If{$traversing$}
+        {$words \gets words + following$}
+        \State{$preceding \gets preceding[1:] + following$}
+      \EndIf
+    \EndWhile
+    \EndProcedure{}
+  \end{algorithmic}
+  \caption{Generates startup ideas.}
+  \label{alg:3}
+\end{algorithm}
+
+After generating a sentence, creativity is ensured by setting a maximum threshold for shared vocabulary between the generated sentence and any single other sentence in the corpus. If there are too many overlapping words, the sentence is rejected immediately. In practice, a threshold ratio around 0.6 offered the right balance between creativity and semantic coherence.
 
 \section{Body 2}
 
 \section{Experiments}
+INCOMPLETE
+
 Analysis, evaluation, and critique of the algorithm and your
 implementation. Include a description of the testing data you used and
 a discussion of examples that illustrate major features of your
@@ -87,6 +138,7 @@ system. Testing is a critical part of system construction, and the
 scope of your testing will be an important component in our
 evaluation. Discuss what you learned from the implementation.
 
+LEAVING THIS TABLE IN HERE IN CASE WE NEED IT
 \begin{table}
   \centering
   \begin{tabular}{ll}
@@ -101,28 +153,76 @@ evaluation. Discuss what you learned from the implementation.
 \end{table}
 
 \subsection{Methods and Models}
-
+INCOMPLETE and might not be necessary given our Model section?
 
 \subsection{Results}
+INCOMPLETE and maybe unnecessary
+For algorithm-comparison projects: a section reporting empirical comparison results preferably presented graphically.
 
- For algorithm-comparison projects: a section reporting empirical comparison results preferably presented graphically.
+If we get some good multi-sentence stuff done we should def include.
 
+Some favorite startup ideas include:
+\begin{quote}
+Anaphore develops protein therapeutics to treat diseases affecting dogs and breeding.\\\\
+Focus Photography Inc specializes in state-of-the-art functional brain imaging that utilizes AJAX technologies in the development of Android apps.\\\\
+The Australian soft toy for children and their patients.\\\\
+Firalis is a fashion-based crowdfunding platform for gamers.\\\\
+A123 Systems is an open community of genealogists collaborating to help users manage their bank accounts from one Web-based inbox.\\\\
+Jewelry for the iPhone.
+\end{quote}
 
 \subsection{Discussion}
-
+INCOMPLETE
 
 \appendix
 
 \section{Program Trace}
 
-Appendix 1 – A trace of the program showing how it handles key examples or some other demonstration of the program in action.
+Appendix 1 will demonstrate a simple example of building a co-occurrence table to model state transitions, and then generating a sentence using the observed probabilities. First, let's build the transition model. We'll use a token length of 1 and the example sentence:
+\begin{quote}
+The cat jumped on the cake and the cat ate the treat.
+\end{quote}
+Given the word ``the'' as a starting state, the following states are comprised of ``cat,'' which appears twice, ``cake,'' which appears once, and ``treat,'' which also appears once. The rest of the vocabulary is never reached from this state. The row of state transitions from ``the'' now looks like:
+\[
+\begin{blockarray}{ccccccccc}
+& the & cat & jumped & on & cake & and & ate & treat \\
+\begin{block}{c(cccccccc)}
+  the & 0 & 2 & 0 & 0 & 1 & 0 & 0 & 1 \\
+\end{block}
+\end{blockarray}
+ \]
+We can extrapolate the model to include the state transitions of the rest of the vocabulary:
+\[
+\begin{blockarray}{ccccccccc}
+& the & cat & jumped & on & cake & and & ate & treat \\
+\begin{block}{c(cccccccc)}
+  the & 0 & 2 & 0 & 0 & 1 & 0 & 0 & 1 \\
+  cat & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 0 \\
+  jumped & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+  on & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+  cake & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+  and & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+  ate & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+  treat & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+\end{block}
+\end{blockarray}
+ \]
+For simplicity, the word ``treat'' has no available transitions, though in our model a stop token would indicate sentence completion. Now we can generate the first few words of a sentence. We'll again start with the state ``the''. We'll pick the next word following our observed distribution: ``cat'': 0.5, ``cake'': 0.25, ``treat'': 0.25. Randomly we pick ``cat'' and our sentence is now ``The cat''. We repeat the process with the updated state ``cat'', which has the transition distribution ``jumped'': 0.5, ``ate'': 0.5. Randomly we pick ``ate'' and our sentence is now ``The cat ate''. We can continue sampling words until a sentence end. This trivial example fails to demonstrate the creative capabilities of a Markovian language model, but with a significantly sized corpus each state will have many possible transitions.
 
 \section{System Description}
 
- Appendix 2 – A clear description of how to use your system and how to generate the output you discussed in the write-up and the example transcript in Appendix 1. N.B.: The teaching staff must be able to run your system.
+Appendix 2 explains the setup necessary to start generating startup ideas using our model. Start by cloning the repository here: \url{https://github.com/cgyulay/startup-generator}. Basic setup is outlined in the project's \texttt{README}, but explanations will be provided here for completeness. An installation of python is assumed. The only python library required for sentence generation using a preprocessed corpus is \texttt{unidecode}. If using a non-preprocessed corpus, the libraries \texttt{nltk} and \texttt{pattern} are also necessary. To run part-of-speech tagging, it's necessary to install \texttt{nltk}'s taggers from the command-line like so:
+\begin{lstlisting}
+python -m nltk.downloader maxent_treebank_pos_tagger
+python -m nltk.downloader averaged_perceptron_tagger
+\end{lstlisting}
+By default, the model will use a corpus of 50,000 cleaned and POS tagged sentences with \(k=3\). The corpus, token size, and number of ideas to generate can all be changed in \texttt{main.py}. To start generating the next killer startup ideas, run:
+\begin{lstlisting}
+python main.py
+\end{lstlisting}
 
 \section{Group Makeup}
-
+INCOMPLETE
  Appendix 3 – A list of each project participant and that
 participant’s contributions to the project. If the division of work
 varies significantly from the project proposal, provide a brief

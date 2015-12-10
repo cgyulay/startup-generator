@@ -44,30 +44,38 @@ The most relevant work came from Grzegorz Szymanski and Zygmnut Ciota, who used 
 Part-of-speech tagging was considered out of scope for this project, so we used the python library Natural Language Toolkit.\cite{bird2015} NLTK uses a maximum entropy model trained on the UPenn Treebank dataset, which includes standard tagged corpora like the Wall Street Journal and the Brown Corpus.\cite{ratnaparkhi1996} When augmenting our dataset, we also made use of the library Pattern for swapping verb conjugation between singular and plural. Pattern is based off of the work of Tom De Smedt and Walter Daelemans.
 \cite{desmedt2015}
 
+\section{Dataset}
+
+We should talk about our dataset here. This should include conversation on where we got it, how we preprocessed (removing sentences with bad punctuation like quotes or parens, pos tagging). Also we should talk about the data augmentation we did for multi-sentence generation (converting sentences of format companyname 3rdpersonverb to format We 1stpersonverb).
+
 \section{Model}
 
-Our model's primary algorithm constructs a dictionary of state transitions: it  learns the underlying probability distribution by accumulating each preceding state's following state, and normalizing to 1. This process of accumulating preceding and following states essentially creates a phrase/word co-occurrence matrix \(M\), where the phrase contains \(k\) words.
+Our model's primary algorithm constructs a dictionary of state transitions: it  learns the underlying probability distribution by accumulating each preceding state's following state, and normalizing to 1. This process of accumulating preceding and following states essentially creates a phrase/word co-occurrence matrix \(M\), where the phrase contains \(k\) words. See Algorithm~\ref{alg:1}.
 
 \begin{algorithm}
   \begin{algorithmic}
     \Procedure{Construct}{$sentences$}
-    \State{$a \gets 10$}
     \For{each $sentence$ in $sentences$}
       \For{$i$ in range(len($sentence$) - $k$)}
-        print hello
+        \State{$preceding \gets$ tuple($sentence[i:i+k]$)}
+        \State{$following \gets sentence[i+k]$}
+        \If{$preceding$ not in $M$}
+          {$M \gets \{\}$}
+        \EndIf
+        \If{$following$ not in $M[preceding]$}
+          {$M[preceding][following] \gets 1$}
+        \Else
+          {$ M[preceding][following] \gets M[preceding][following]+1$}
+        \EndIf
       \EndFor
     \EndFor
     \EndProcedure{}
   \end{algorithmic}
   \caption{Building transition probabilities.}
+  \label{alg:1}
 \end{algorithm}
 
-A clear specification of the algorithm(s) you used and a description
-of the main data structures in the implementation. Include a
-discussion of any details of the algorithm that were not in the
-published paper(s) that formed the basis of your implementation. A
-reader should be able to reconstruct and verify your work from reading
-your paper.
+The next important algorithm we implemented generates text given 
 
 \section{Body 2}
 

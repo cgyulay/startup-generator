@@ -29,6 +29,7 @@ class Tagger(object):
       dest = open(dest_path, 'w')
 
       for i, s in enumerate(sentences):
+        if '' in s: continue
         tagged = self.pos_tag(s)
         dest.write(' '.join(tagged) + '\n')
 
@@ -138,6 +139,6 @@ class Tagger(object):
     return sentences
 
 # Run
-corpus_path = 'corpora/crunchbase_descriptions_.txt'
+corpus_path = 'corpora/crunchbase_descriptions_25000_2.txt'
 dest_path = 'tagged_' + corpus_path
 tagger = Tagger(corpus_path, dest_path)

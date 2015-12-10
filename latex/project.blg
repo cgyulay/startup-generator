@@ -3,50 +3,54 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: project.aux
 The style file: plain.bst
 Database file #1: project.bib
+Warning--to sort, need author or key in bird2015
+Warning--to sort, need author or key in desmedt2015
+Warning--empty author in bird2015
+Warning--empty journal in bird2015
+Warning--empty author in desmedt2015
 Warning--empty journal in norris1998
-Warning--empty year in norris1998
 Warning--empty journal in ratnaparkhi1996
 Warning--empty journal in szymanski2014
 Warning--empty journal in volfovsky2007
-You've used 4 entries,
+You've used 6 entries,
             2118 wiz_defined-function locations,
-            513 strings with 4313 characters,
-and the built_in function-call counts, 988 in all, are:
-= -- 93
-> -- 34
+            524 strings with 4468 characters,
+and the built_in function-call counts, 1420 in all, are:
+= -- 139
+> -- 36
 < -- 1
-+ -- 15
++ -- 17
 - -- 10
-* -- 48
-:= -- 177
-add.period$ -- 12
-call.type$ -- 4
-change.case$ -- 17
+* -- 81
+:= -- 233
+add.period$ -- 16
+call.type$ -- 6
+change.case$ -- 23
 chr.to.int$ -- 0
-cite$ -- 9
-duplicate$ -- 46
-empty$ -- 79
+cite$ -- 15
+duplicate$ -- 67
+empty$ -- 126
 format.name$ -- 10
-if$ -- 198
+if$ -- 293
 int.to.chr$ -- 0
-int.to.str$ -- 4
-missing$ -- 4
-newline$ -- 23
+int.to.str$ -- 6
+missing$ -- 6
+newline$ -- 31
 num.names$ -- 8
-pop$ -- 27
+pop$ -- 33
 preamble$ -- 1
-purify$ -- 13
+purify$ -- 17
 quote$ -- 0
-skip$ -- 34
+skip$ -- 49
 stack$ -- 0
-substring$ -- 40
-swap$ -- 5
+substring$ -- 81
+swap$ -- 6
 text.length$ -- 1
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 16
-warning$ -- 5
-while$ -- 11
-width$ -- 5
-write$ -- 38
-(There were 5 warnings)
+type$ -- 24
+warning$ -- 9
+while$ -- 13
+width$ -- 7
+write$ -- 55
+(There were 9 warnings)

@@ -10,7 +10,7 @@ START = 'XxSTARTxX'
 STOP = 'XxSTOPxX'
 
 # Maximum bag of words overlap ratio between two sentences
-MAX_BOW_OVERLAP = 0.6
+MAX_BOW_OVERLAP = 0.5
 
 class Model(object):
 

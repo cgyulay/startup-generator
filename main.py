@@ -5,8 +5,8 @@ print 'Building model...this could take a few seconds.\n'
 # NB: Generator's __init__ in markov.py must be modified per the directions
 # there if you select an untagged corpus.
 # corpus_path = 'corpora/crunchbase_descriptions.txt'
-# corpus_path = 'corpora/crunchbase_descriptions_small.txt'
-# corpus_path = 'corpora/punctuation_test.txt'
+
+# Using a preprocessed corpus
 corpus_path = 'tagged_corpora/crunchbase_descriptions_50000.txt'
 
 # The number of words used in the preceding state

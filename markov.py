@@ -323,13 +323,9 @@ class Generator(object):
         continue
 
       if sentences[i] in ['.', '!', '?']:
-        # TODO
         # Need to specifically handle tlds like .com, .net for this dataset
         # Assume there are no sentences with one word
-        # Can pass tuple to startswith if helpful
-
         # handles these cases, more can be added with similar method
-        # one issue now is that sentences still can start with "com" or something, making it nonsense
         if (i < len(sentences) - 1) and (sentences[i+1].lower().startswith('com') or sentences[i-1].lower().endswith('inc') or \
           sentences[i+1].lower().startswith('it') or sentences[i+1].lower().startswith('net') or sentences[i+1].lower().startswith('dm')):
           c = sentences[i-1] + sentences[i] + sentences[i+1]

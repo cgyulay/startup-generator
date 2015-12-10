@@ -3,56 +3,52 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: project.aux
 The style file: plain.bst
 Database file #1: project.bib
-Warning--I didn't find a database entry for "palangi2015"
-Warning--to sort, need author or key in bird2015
-Warning--to sort, need author or key in desmedt2015
-Warning--empty author in bird2015
 Warning--empty journal in bird2015
-Warning--empty author in desmedt2015
 Warning--empty journal in graham2005
 Warning--empty journal in norris1998
+Warning--empty journal in palangi2015
 Warning--empty journal in ratnaparkhi1996
 Warning--empty journal in szymanski2014
 Warning--empty journal in volfovsky2007
-You've used 7 entries,
+You've used 8 entries,
             2118 wiz_defined-function locations,
-            529 strings with 4523 characters,
-and the built_in function-call counts, 1623 in all, are:
-= -- 158
-> -- 43
+            534 strings with 4676 characters,
+and the built_in function-call counts, 2009 in all, are:
+= -- 193
+> -- 79
 < -- 1
-+ -- 20
-- -- 12
-* -- 89
-:= -- 271
-add.period$ -- 19
-call.type$ -- 7
-change.case$ -- 27
++ -- 33
+- -- 24
+* -- 104
+:= -- 361
+add.period$ -- 24
+call.type$ -- 8
+change.case$ -- 36
 chr.to.int$ -- 0
-cite$ -- 17
-duplicate$ -- 77
-empty$ -- 143
-format.name$ -- 12
-if$ -- 333
+cite$ -- 15
+duplicate$ -- 87
+empty$ -- 158
+format.name$ -- 24
+if$ -- 402
 int.to.chr$ -- 0
-int.to.str$ -- 7
-missing$ -- 7
-newline$ -- 36
-num.names$ -- 10
-pop$ -- 39
+int.to.str$ -- 8
+missing$ -- 8
+newline$ -- 43
+num.names$ -- 16
+pop$ -- 48
 preamble$ -- 1
-purify$ -- 20
+purify$ -- 28
 quote$ -- 0
-skip$ -- 56
+skip$ -- 64
 stack$ -- 0
-substring$ -- 86
+substring$ -- 91
 swap$ -- 6
 text.length$ -- 1
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 28
-warning$ -- 10
-while$ -- 15
-width$ -- 8
-write$ -- 64
-(There were 11 warnings)
+type$ -- 32
+warning$ -- 7
+while$ -- 21
+width$ -- 9
+write$ -- 77
+(There were 7 warnings)

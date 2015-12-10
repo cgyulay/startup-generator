@@ -428,7 +428,7 @@ class Generator(object):
             return ' '.join(words)
         else:
           return ' '.join(words)
-    return None
+    return ''
 
   def create_sentence(self, previous=None):
     '''

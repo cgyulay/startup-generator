@@ -12,27 +12,16 @@ STOP = 'XxSTOPxX'
 # Maximum bag of words overlap ratio between two sentences
 MAX_BOW_OVERLAP = 0.6
 
-##
-# IDEAS
-##
-# how to improve following sentence coherence
-# 1)  use word embeddings to generate a sentence vector
-# 2a) adjust markovian word probabilities to maximize cosine similarity
-#     between first sentence and following in-progress sentence
-# 2b) generate many following sentences and pick highest given cosine
-#     similarity between first and following complete sentence
-#
-# 1)  use bag of words to ensure similar language among sentences
-# 2)  combine BOW with embeddings?
-##
-
-
 class Model(object):
 
   def __init__(self, sentences, token_size=2):
     '''
     sentences: Cleaned and separated sentences from corpus.
     token_size: Number of words in the model's context window.
+
+    This is the meat and potatoes of the project. The Model class builds a
+    transition model from a list of sentences and can be asked to generate new
+    sentences from these transitions.
     '''
 
     self.token_size = token_size
@@ -43,6 +32,7 @@ class Model(object):
   def pad(self, sentence, token_size):
     '''
     sentence: A sentence split out from the corpus.
+    token_size: Number of words in the model's context window.
 
     Adds padding proportional to token_size.
     '''
@@ -52,6 +42,9 @@ class Model(object):
 
   def construct(self, sentences, token_size):
     '''
+    sentences: A list of cleaned sentences.
+    token_size: Number of words in the model's context window.
+
     Constructs a nested dictionary that stores all preceding states of length
     token_size, and the transitions from each state with their associated
     probabilities.
@@ -75,6 +68,9 @@ class Model(object):
 
   def next(self, dictionary, preceding):
     '''
+    dictionary: A dictionary that stores the state transition model.
+    preceding: A tuple representing the state from which to transition.
+
     Picks the next word in the chain by sampling from the weighted distribution
     of the preceding state.
     '''
@@ -387,17 +383,12 @@ class Generator(object):
 
     return True
 
-  def create_followup(self, start):
-    words2 = []
-    for i in range(10):
-      words2 = self.model.create_sentence((start,))
-      if self.test_sentence(words2):
-        words2 = self.remove_pos_tag(words2)
-        return words2
-
   def is_match(self, words1, words2):
     '''
-    takes out the common buzz words and checks for same words
+    words1: Sentence in list form.
+    words2: Sentence in list form.
+
+    Removes out the common buzz words and checks for same words.
     '''
 
     # only need to filter one list since other one won't be able to match anyway
@@ -417,8 +408,8 @@ class Generator(object):
     if len(amount) > 1:
       return True
     return False
-  def create_sentence_from_state(self, model, preceding=None, prevWords=None):
 
+  def create_sentence_from_state(self, model, preceding=None, prevWords=None):
     '''
     model: The Markov chain model from which to generate text.
     preceding: A tuple of words representing the desired starting state. Must
@@ -438,7 +429,6 @@ class Generator(object):
         else:
           return ' '.join(words)
     return None
-
 
   def create_sentence(self, previous=None):
     '''

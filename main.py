@@ -9,8 +9,13 @@ print 'Building model...this could take a few seconds.\n'
 # corpus_path = 'corpora/punctuation_test.txt'
 corpus_path = 'tagged_corpora/crunchbase_descriptions_50000.txt'
 
+# The number of words used in the preceding state
 token_size = 3
+
+# Whether or not to generate multiple sentences per startup idea
 multi_sent = False
+
+# The number of startup ideas to generate
 num_ideas = 5
 
 model = markov.Generator(corpus_path, token_size, multi_sent=multi_sent)

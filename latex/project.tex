@@ -50,7 +50,6 @@ We would be remiss not to mention a final inspiration for this project: legendar
 
 \section{Dataset}
 
-
 We collected 150,000 company descriptions from Crunchbase, all of them being one sentence in length. In cleaning up the descriptions for our use, we removed sentences with difficult punctuation, including question marks, exclamation points, quotations, parentheses, and brackets. As the Markov property is memoryless, if we have a sentence that contains a start quote, we are not guaranteed to have an end quote, which would make the sentence unnecessarily confusing and simply wrong. Similarly, we could possibly end a sentence with a question mark where it does not make sense with the earlier chosen words. Therefore, we removed the possibility of these confusions in the cleaning of the text.
 
 Additionally, in the preprocessing phase, we used the python library Natural Language Toolkit (NLT) to tag each of the words in the corpus with its part of speech (POS). This was helpful in generating more grammatically correct sentences because it resolved ambiguity where a single word could have multiple POS associations. Consider, for example, the word 'diet,' which can be a noun or a verb. In our transition dictionary, instead of one key for 'diet', this word has two distinct keys, one as a noun and the other as a verb, such that when we request a next word according to the Markov model, the word is used in the right context with respect to POS. When we actually display this sentence after its been generated, all the POS tags have been stripped. 

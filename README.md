@@ -27,3 +27,9 @@ python -m nltk.downloader averaged_perceptron_tagger
 ```
 python main.py
 ```
+
+----
+####Contributors
+[Antuan Tran](https://github.com/tuantrain)
+
+[Evan Gastman](https://github.com/evangastman)

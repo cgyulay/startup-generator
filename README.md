@@ -4,9 +4,10 @@ Using Markov chains to generate fake startup ideas: the monkeys on typewriters a
 #####Some of our favorite examples:
 
 * Anaphore develops protein therapeutics to treat diseases affecting dogs and breeding.
-* Focus Photography Inc specializes in state-of-the-art functional brain imaging that uti- lizes AJAX technologies in the development of Android apps.
-* The Australian soft toy for children and their patients. Firalis is a fashion-based crowdfunding platform for gamers.
-* A123 Systems is an open community of genealogists collaborating to help users man- age their bank accounts from one Web-based inbox.
+* Focus Photography Inc specializes in state-of-the-art functional brain imaging that utilizes AJAX technologies in the development of Android apps.
+* The Australian soft toy for children and their patients.
+* Firalis is a fashion-based crowdfunding platform for gamers.
+* A123 Systems is an open community of genealogists collaborating to help users manage their bank accounts from one Web-based inbox.
 * Jewelry for the iPhone.
 * Good Health Media is an online platform that offers sports fans the opportunity to go on a fascinating wine adventure.
 
